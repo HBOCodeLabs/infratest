@@ -1,0 +1,34 @@
+name: Main release workflow
+on:
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "README.md"
+      - ".github/*"
+      - "LICENSE"
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+      - name: Check out source code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: go test -v ./...
+      - name: Generate semantic version
+        id: generate-version
+        uses: paulhatch/semantic-version@v4.0.2
+        with:
+          tag_prefix: ""
+          format: "${major}.${minor}.${patch}"
+      - name: Generate release
+        uses: Roang-zero1/github-create-release-action@master
+        with:
+          created_tag: "${{ steps.generate-version.outputs.version_tag }}"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

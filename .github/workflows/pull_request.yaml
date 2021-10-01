@@ -1,0 +1,21 @@
+name: Validate Pull Request
+on: [pull_request]
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+      - name: Check out source code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: go test -v ./...
+      # Left here for future consideration
+      # - name: Comment PR
+      #   uses: thollander/actions-comment-pull-request@v1
+      #   with:
+      #     message: 'Example of message !'
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
