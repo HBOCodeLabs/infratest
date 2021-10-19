@@ -19,7 +19,7 @@ type EC2Client interface {
 	DescribeTags(context.Context, *ec2.DescribeTagsInput, ...func(*ec2.Options)) (*ec2.DescribeTagsOutput, error)
 }
 
-// AssertEC2VolumeEncryptedInput is used as an input to the AssertEC2VolumeEncryptedE method.
+// AssertEC2VolumeEncryptedInput is used as an input to the AssertEC2VolumeEncryptedE and AssertEC2VolumeEncrypted methods.
 type AssertEC2VolumeEncryptedInput struct {
 	// The device ID that the volume is mapped to on the instance.
 	DeviceID string
@@ -50,6 +50,7 @@ type AssertEC2TagValueInput struct {
 }
 
 // AssertEC2VolumeEncryptedE asserts that a volume attached to an EC2 instance is encrypted and (optionally) done so using a specified KMS Key.
+// This function is deprecated in favor of the AssertEC2VolumeEncrypted method.
 func AssertEC2VolumeEncryptedE(ctx context.Context, client EC2Client, input AssertEC2VolumeEncryptedInput) (assertion bool, err error) {
 	assertion = false
 
@@ -80,6 +81,32 @@ func AssertEC2VolumeEncryptedE(ctx context.Context, client EC2Client, input Asse
 
 	assertion = deviceEncrypted && deviceFound && kmsKeyMatches
 	return
+}
+
+func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2VolumeEncryptedInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+	assert.Nil(t, err)
+
+	deviceFound := false
+	deviceEncrypted := false
+	var trueVal bool = true
+	for _, v := range instance.BlockDeviceMappings {
+		if *v.DeviceName == input.DeviceID {
+			deviceFound = true
+			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+			assert.Nil(t, err)
+			if *volume.Encrypted == trueVal {
+				deviceEncrypted = true
+			}
+			if input.KMSKeyID != ""  {
+				assert.Equal(t, input.KMSKeyID, *volume.KmsKeyId, "Volume with device ID '%s' for instance '%s' was not encrypted using the correct KMS Key ID.", input.DeviceID, input.InstanceID)
+			}
+		}
+	}
+
+	assert.True(t, deviceFound, "Volume with device ID '%s' was not found for instance '%s'.", input.DeviceID, input.InstanceID)
+	assert.True(t, deviceEncrypted, "Volume with device ID '%s' for instance '%s' was not encrypted.", input.DeviceID, input.InstanceID)
 }
 
 

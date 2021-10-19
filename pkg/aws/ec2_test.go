@@ -93,6 +93,57 @@ func TestAssertEC2VolumeEncryptedE_Match(t *testing.T) {
 
 }
 
+func TestAssertEC2VolumeEncrypted_Match(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			types.Reservation{
+				Instances: []types.Instance{
+					types.Instance{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							types.InstanceBlockDeviceMapping{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			types.Volume{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeEncrypted(fakeTest, context.Background(), clientMock, AssertEC2VolumeEncryptedInput{
+		DeviceID:   deviceName,
+		InstanceID: instanceID,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+
 func TestAssertEC2VolumeEncryptedE_NoMatch(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
@@ -142,6 +193,56 @@ func TestAssertEC2VolumeEncryptedE_NoMatch(t *testing.T) {
 	assert.False(t, result)
 	assert.Nil(t, err)
 
+}
+
+func TestAssertEC2VolumeEncrypted_NoMatch(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := false
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			types.Reservation{
+				Instances: []types.Instance{
+					types.Instance{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							types.InstanceBlockDeviceMapping{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			types.Volume{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeEncrypted(fakeTest, context.Background(), clientMock, AssertEC2VolumeEncryptedInput{
+		DeviceID:   deviceName,
+		InstanceID: instanceID,
+	})
+
+	// Assert
+	assert.True(t, fakeTest.Failed())
 }
 
 func TestAssertEC2VolumeEncryptedE_MatchWithKMSKeyID(t *testing.T) {
@@ -195,6 +296,57 @@ func TestAssertEC2VolumeEncryptedE_MatchWithKMSKeyID(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestAssertEC2VolumeEncrypted_MatchWithKMSKeyID(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			types.Reservation{
+				Instances: []types.Instance{
+					types.Instance{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							types.InstanceBlockDeviceMapping{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			types.Volume{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeEncrypted(fakeTest, context.Background(), clientMock, AssertEC2VolumeEncryptedInput{
+		DeviceID:   deviceName,
+		InstanceID: instanceID,
+		KMSKeyID:   kmsKeyID,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
 func TestAssertEC2VolumeEncryptedE_NoMatchWithKMSKeyID(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
@@ -245,6 +397,58 @@ func TestAssertEC2VolumeEncryptedE_NoMatchWithKMSKeyID(t *testing.T) {
 	// Assert
 	assert.False(t, result)
 	assert.Nil(t, err)
+}
+
+func TestAssertEC2VolumeEncrypted_NoMatchWithKMSKeyID(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	kmsKeyID2 := "/key/id2"
+	encrypted := true
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			types.Reservation{
+				Instances: []types.Instance{
+					types.Instance{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							types.InstanceBlockDeviceMapping{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			types.Volume{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID2,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeEncrypted(fakeTest, context.Background(), clientMock, AssertEC2VolumeEncryptedInput{
+		DeviceID:   deviceName,
+		InstanceID: instanceID,
+		KMSKeyID:   kmsKeyID,
+	})
+
+	// Assert
+	assert.True(t, fakeTest.Failed())
 }
 
 func TestAssertEC2TagValue_NoMatch(t *testing.T) {
