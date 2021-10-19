@@ -3,10 +3,12 @@ package aws
 import (
 	"context"
 	"fmt"
+	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/stretchr/testify/assert"
 )
 
 type EC2Client interface {
@@ -27,8 +29,18 @@ type AssertEC2VolumeEncryptedInput struct {
 	InstanceID string
 }
 
-// AssertEC2TagValueEInput is used as an input to the AssertEC2TagValueE method.
+// AssertEC2TagValueEInput is used as an input to the AssertEC2TagValueE method. This is deprecated.
 type AssertEC2TagValueEInput struct {
+	// The name of the tag to assert exists.
+	TagName string
+	// The value of the tag to assert.
+	Value string
+	// The Instance ID that the tag mustbe set on.
+	InstanceID string
+}
+
+// AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method. This is deprecated.
+type AssertEC2TagValueInput struct {
 	// The name of the tag to assert exists.
 	TagName string
 	// The value of the tag to assert.
@@ -70,7 +82,35 @@ func AssertEC2VolumeEncryptedE(ctx context.Context, client EC2Client, input Asse
 	return
 }
 
+
+// AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
+func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2TagValueInput) {
+	resourceTypeFilterName := "resource-type"
+	resourceTypeFilterValue := "instance"
+	describeTagsInput := &ec2.DescribeTagsInput{
+		Filters: []types.Filter{
+			{
+				Name: &resourceTypeFilterName,
+				Values: []string{resourceTypeFilterValue},
+			},
+		},
+	}
+	describeTagsOutput, err := client.DescribeTags(ctx, describeTagsInput)
+	assert.Nil(t, err)
+	hasMatch := false
+	for _, tag := range(describeTagsOutput.Tags) {
+		tagKey := *tag.Key
+		tagValue := *tag.Value
+		if tagKey == input.TagName {
+			hasMatch = true
+			assert.Equal(t, input.Value, tagValue, "Tag with key '%s' does not match expected value.", tagKey)
+		}
+	}
+	assert.True(t, hasMatch, "Tag with key '%s' does not exist.", input.TagName)
+}
+
 // AssertEC2TagValueE asserts that an EC2 instance has a given tag with the given value.
+// This func is deprecated in favor of the AssertEC2TagValue function.
 func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2TagValueEInput) (assertion bool, err error) {
 	resourceTypeFilterName := "resource-type"
 	resourceTypeFilterValue := "instance"
