@@ -247,6 +247,41 @@ func TestAssertEC2VolumeEncryptedE_NoMatchWithKMSKeyID(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestAssertEC2TagValue_NoMatch(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	tagName := "MyTag"
+	tagValue := "TagValue"
+	wrongTagValue := "OtherValue"
+	nextToken := ""
+	describeTagsOutput := &ec2.DescribeTagsOutput{
+		NextToken: &nextToken,
+		Tags: []types.TagDescription{
+			{
+				ResourceId: &instanceID,
+				ResourceType: types.ResourceTypeInstance,
+				Key: &tagName,
+				Value: &wrongTagValue,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeTagsOutput: describeTagsOutput,
+		Test: t,
+	}
+	describeTagsInput := AssertEC2TagValueInput{
+		TagName: tagName,
+		Value: tagValue,
+		InstanceID: instanceID,
+	}
+	ctx := context.Background()
+	fakeTest := &testing.T{}
+
+	// Test
+	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
+	assert.True(t, fakeTest.Failed(), "AssertEC2TagValue did not fail the test when the tag value did not match.")
+}
+
 func TestAssertEC2TagValueE_NoMatch(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
@@ -318,4 +353,38 @@ func TestAssertEC2TagValueE_Match(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.True(t, result, "AssertEC2TagValueE returned 'false' when tag value matched.")
+}
+
+func TestAssertEC2TagValue_Match(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	tagName := "MyTag"
+	tagValue := "TagValue"
+	nextToken := ""
+	describeTagsOutput := &ec2.DescribeTagsOutput{
+		NextToken: &nextToken,
+		Tags: []types.TagDescription{
+			{
+				ResourceId: &instanceID,
+				ResourceType: types.ResourceTypeInstance,
+				Key: &tagName,
+				Value: &tagValue,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeTagsOutput: describeTagsOutput,
+		Test: t,
+	}
+	describeTagsInput := AssertEC2TagValueInput{
+		TagName: tagName,
+		Value: tagValue,
+		InstanceID: instanceID,
+	}
+	ctx := context.Background()
+	fakeTest := &testing.T{}
+
+	// Test
+	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
+	assert.False(t, fakeTest.Failed(), "AssertEC2TagValue failed the test when tag value matched.")
 }
