@@ -227,8 +227,22 @@ func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[strin
 	return
 }
 
-type AssertEC2InstancesSubnetBalancedByTagInput struct {
-	// A map of string values that define the tag keys and values on which to retrieve the EC2 instances.
-	TagValues map[string]string
+type AssertEC2InstancesSubnetBalancedInput struct {
+	// A list of instances
+	Instances []types.Instance
+
+	// A list of subnets
+	Subnets []types.Subnet
+}
+// AssertEC2InstancesSubnetBalanced asserts that EC2 instances in a list are spread evenly throughout a list of subnets,
+// such that instance number 'x' in the list should be placed in the subnet with an index of 'x modulus the length of the 
+// subnet list'.
+func AssertEC2InstancesSubnetBalanced(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
+	subnetListLength := len(input.Subnets)
+	for instanceIndex, instance := range(input.Instances) {
+		acutalSubnetID := instance.SubnetId
+		expectedSubnetID := input.Subnets[instanceIndex % subnetListLength].SubnetId
+		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.")
+	}
 }
 //func AssertEC2InstancesSubnetBalancedByTag(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2InstancesSubnetBalancedInput)

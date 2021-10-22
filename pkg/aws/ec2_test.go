@@ -657,3 +657,44 @@ func TestGetEC2InstancesByTag(t *testing.T) {
 	assert.Nil(t, err, "getEC2InstancesByTagE returned an unexpected error")
 	assert.ElementsMatch(t, expectedOutput, actualOutput, "getEC2InstancesByTagE did not return the expected results")
 }
+
+
+func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
+	subnetID1 := "s123456"
+	subnetID2 := "s7891011"
+	subnets := []types.Subnet{
+		{
+			SubnetId: &subnetID1,
+		},
+		{
+			SubnetId: &subnetID2,
+		},
+	}
+	instanceID1 := "a123456"
+	instanceID2 := "b123456"
+	instanceID3 := "c123456"
+	instances := []types.Instance{
+		{
+			InstanceId: &instanceID1,
+			SubnetId: &subnetID1,
+		},
+		{
+			InstanceId: &instanceID2,
+			SubnetId: &subnetID2,
+		},
+		{
+			InstanceId: &instanceID3,
+			SubnetId: &subnetID1,
+		},
+	}
+	input := AssertEC2InstancesSubnetBalancedInput{
+		Instances: instances,
+		Subnets: subnets,
+	}
+	fakeTest := &testing.T{}
+	ctx := context.Background()
+	
+	AssertEC2InstancesSubnetBalanced(fakeTest, ctx, input)
+
+	assert.False(t, fakeTest.Failed())	
+}
