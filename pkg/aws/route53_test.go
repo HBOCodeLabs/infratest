@@ -25,24 +25,23 @@ func (c Route53ClientMock) ListHostedZonesByName(listHostedZonesByNameInput *rou
 }
 
 func TestAssertRoute53HostedZoneExists_NotFound(t *testing.T) {
+	fakeTest := &testing.T{}
 	client := NewMockClient(&route53.ListHostedZonesOutput{}, nil)
-	exists, err := AssertRoute53HostedZoneExists(client, "foo.com")
+	AssertRoute53HostedZoneExists(fakeTest, client, "expected AssertRoute53HostedZoneExists to fail")
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "'foo.com' not found")
-	assert.False(t, exists)
+	assert.True(t, fakeTest.Failed(), "foo")
 }
 
 func TestAssertRoute53HostedZoneExists_Error(t *testing.T) {
+	fakeTest := &testing.T{}
 	client := NewMockClient(&route53.ListHostedZonesOutput{}, errors.New("some error"))
-	exists, err := AssertRoute53HostedZoneExists(client, "foo.com")
+	AssertRoute53HostedZoneExists(fakeTest, client, "foo.com")
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "some error")
-	assert.False(t, exists)
+	assert.True(t, fakeTest.Failed(), "expected AssertRoute53HostedZoneExists to fail")
 }
 
 func TestAssertRoute53HostedZoneExists_Found(t *testing.T) {
+	fakeTest := &testing.T{}
 	name := "foo.com"
 	client := NewMockClient(&route53.ListHostedZonesOutput{
 		HostedZones: []*route53.HostedZone{
@@ -51,8 +50,7 @@ func TestAssertRoute53HostedZoneExists_Found(t *testing.T) {
 			},
 		},
 	}, nil)
-	exists, err := AssertRoute53HostedZoneExists(client, name)
+	AssertRoute53HostedZoneExists(fakeTest, client, name)
 
-	assert.Nil(t, err)
-	assert.True(t, exists)
+	assert.False(t, fakeTest.Failed(), "expected AssertRoute53HostedZoneExists to pass")
 }

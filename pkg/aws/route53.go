@@ -2,8 +2,10 @@ package aws
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/stretchr/testify/assert"
 )
 
 // Route53Client is an AWS Route53 API client.
@@ -12,21 +14,21 @@ type Route53Client interface {
 	ListHostedZonesByName(*route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
 }
 
-// AssertRoute53HostedZoneExists reports whether or not the Route53 zone name
+// AssertRoute53HostedZoneExists asserts whether or not the Route53 zone name
 // it's passed is found amongst those reported by the AWS API.
-func AssertRoute53HostedZoneExists(client Route53Client, zoneName string) (bool, error) {
+func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName string) {
+	found := false
 	zones, err := client.ListHostedZonesByName(&route53.ListHostedZonesByNameInput{
 		DNSName: &zoneName,
 	})
-	if err != nil {
-		return false, err
-	}
+	assert.Nil(t, err)
 
 	for _, n := range zones.HostedZones {
 		if zoneName == *n.Name {
-			return true, nil
+			found = true
+			break
 		}
 	}
 
-	return false, fmt.Errorf("'%s' not found", zoneName)
+	assert.True(t, found, fmt.Sprintf("'%s' not found", zoneName))
 }
