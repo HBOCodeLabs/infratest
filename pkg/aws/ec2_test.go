@@ -694,7 +694,7 @@ func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
 	fakeTest := &testing.T{}
 	ctx := context.Background()
 	
-	AssertEC2InstancesSubnetBalanced(fakeTest, ctx, input)
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
 
 	assert.False(t, fakeTest.Failed())	
 }

@@ -234,10 +234,10 @@ type AssertEC2InstancesSubnetBalancedInput struct {
 	// A list of subnets
 	Subnets []types.Subnet
 }
-// AssertEC2InstancesSubnetBalanced asserts that EC2 instances in a list are spread evenly throughout a list of subnets,
+// AssertEC2InstancesBalancedInSubnets asserts that EC2 instances in a list are spread evenly throughout a list of subnets,
 // such that instance number 'x' in the list should be placed in the subnet with an index of 'x modulus the length of the 
 // subnet list'.
-func AssertEC2InstancesSubnetBalanced(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
+func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
 	subnetListLength := len(input.Subnets)
 	for instanceIndex, instance := range(input.Instances) {
 		acutalSubnetID := instance.SubnetId
@@ -245,4 +245,3 @@ func AssertEC2InstancesSubnetBalanced(t *testing.T, ctx context.Context, input A
 		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.")
 	}
 }
-//func AssertEC2InstancesSubnetBalancedByTag(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2InstancesSubnetBalancedInput)
