@@ -1,3 +1,5 @@
+// Copyright (c) WarnerMedia Direct, LLC. All rights reserved. Licensed under the MIT license.
+// See the LICENSE file for license information.
 package aws
 
 import (
@@ -99,7 +101,7 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 			if *volume.Encrypted == trueVal {
 				deviceEncrypted = true
 			}
-			if input.KMSKeyID != ""  {
+			if input.KMSKeyID != "" {
 				assert.Equal(t, input.KMSKeyID, *volume.KmsKeyId, "Volume with device ID '%s' for instance '%s' was not encrypted using the correct KMS Key ID.", input.DeviceID, input.InstanceID)
 			}
 		}
@@ -109,7 +111,6 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 	assert.True(t, deviceEncrypted, "Volume with device ID '%s' for instance '%s' was not encrypted.", input.DeviceID, input.InstanceID)
 }
 
-
 // AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
 func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2TagValueInput) {
 	resourceTypeFilterName := "resource-type"
@@ -117,7 +118,7 @@ func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, inpu
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
-				Name: &resourceTypeFilterName,
+				Name:   &resourceTypeFilterName,
 				Values: []string{resourceTypeFilterValue},
 			},
 		},
@@ -125,7 +126,7 @@ func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, inpu
 	describeTagsOutput, err := client.DescribeTags(ctx, describeTagsInput)
 	assert.Nil(t, err)
 	hasMatch := false
-	for _, tag := range(describeTagsOutput.Tags) {
+	for _, tag := range describeTagsOutput.Tags {
 		tagKey := *tag.Key
 		tagValue := *tag.Value
 		if tagKey == input.TagName {
@@ -144,7 +145,7 @@ func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2Ta
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
-				Name: &resourceTypeFilterName,
+				Name:   &resourceTypeFilterName,
 				Values: []string{resourceTypeFilterValue},
 			},
 		},
@@ -154,7 +155,7 @@ func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2Ta
 		return false, err
 	}
 	hasTagMatch := false
-	for _, tag := range(describeTagsOutput.Tags) {
+	for _, tag := range describeTagsOutput.Tags {
 		tagKey := tag.Key
 		tagValue := tag.Value
 		if *tagKey == input.TagName {
