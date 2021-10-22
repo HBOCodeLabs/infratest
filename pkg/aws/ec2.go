@@ -9,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -167,7 +166,7 @@ func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2Ta
 	return hasTagMatch, nil
 }
 
-func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, InstanceID string) (ec2types.Instance, error) {
+func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, InstanceID string) (types.Instance, error) {
 	describeInstancesInput := &ec2.DescribeInstancesInput{
 		InstanceIds: []string{InstanceID},
 	}
@@ -183,7 +182,7 @@ func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, Instance
 	return instance, nil
 }
 
-func getEC2VolumeByVolumeIDE(ctx context.Context, client EC2Client, VolumeID string) (ec2types.Volume, error) {
+func getEC2VolumeByVolumeIDE(ctx context.Context, client EC2Client, VolumeID string) (types.Volume, error) {
 	describeVolumesInput := &ec2.DescribeVolumesInput{
 		VolumeIds: []string{VolumeID},
 	}
