@@ -5,6 +5,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -14,6 +15,7 @@ import (
 )
 
 type EC2ClientMock struct {
+	DescribeInstancesInput  *ec2.DescribeInstancesInput
 	DescribeInstancesOutput *ec2.DescribeInstancesOutput
 	DescribeVolumesOutput   *ec2.DescribeVolumesOutput
 	DescribeTagsOutput      *ec2.DescribeTagsOutput
@@ -21,6 +23,12 @@ type EC2ClientMock struct {
 }
 
 func (c EC2ClientMock) DescribeInstances(ctx context.Context, input *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
+	if c.Test == nil && c.DescribeInstancesInput != nil {
+		return nil, fmt.Errorf("Mock object not set up with a test object.")
+	}
+	if c.DescribeInstancesInput != nil {
+		assert.Equal(c.Test, c.DescribeInstancesInput, input)
+	}
 	return c.DescribeInstancesOutput, nil
 }
 
@@ -29,6 +37,9 @@ func (c EC2ClientMock) DescribeVolumes(ctx context.Context, input *ec2.DescribeV
 }
 
 func (c EC2ClientMock) DescribeTags(ctx context.Context, input *ec2.DescribeTagsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTagsOutput, error) {
+	if c.Test == nil {
+		return nil, fmt.Errorf("Mock object not set up with a test object.")
+	}
 	hasInstanceResourceTypeFilter := false
 	resourceTypeFilterName := "resource-type"
 	for _, filter := range input.Filters {
@@ -594,4 +605,55 @@ func TestAssertEC2TagValue_Match(t *testing.T) {
 	// Test
 	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
 	assert.False(t, fakeTest.Failed(), "AssertEC2TagValue failed the test when tag value matched.")
+}
+
+func TestGetEC2InstancesByTag(t *testing.T) {
+	// Setup
+	tagName := "myTag"
+	tagKeyName := fmt.Sprintf("tag:%s", tagName)
+	tagValues := []string{"myValue1", "myValuy2"}
+	tags := map[string][]string {
+		tagName: tagValues,
+	}
+	filters := []types.Filter{
+		{
+			Name: &tagKeyName,
+			Values: tagValues,
+		},
+	}
+	expectedInput := &ec2.DescribeInstancesInput{
+		Filters: filters,
+	}
+	instanceID := "abc123456"
+	output := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+					},
+				},
+			},
+		},
+		NextToken: nil,
+	}
+	expectedOutput := []types.Instance{
+		{
+			InstanceId: &instanceID,
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesInput: expectedInput,
+		DescribeInstancesOutput: output,
+		Test: t,
+	}
+	ctx := context.Background()
+
+	// Execute
+	actualOutput, err := getEC2InstancesByTagE(ctx, clientMock, tags)
+
+
+	// Assert
+	assert.Nil(t, err, "getEC2InstancesByTagE returned an unexpected error")
+	assert.ElementsMatch(t, expectedOutput, actualOutput, "getEC2InstancesByTagE did not return the expected results")
 }

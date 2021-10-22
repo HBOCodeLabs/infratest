@@ -197,3 +197,38 @@ func getEC2VolumeByVolumeIDE(ctx context.Context, client EC2Client, VolumeID str
 	volume := describeVolumesOutput.Volumes[0]
 	return volume, nil
 }
+
+func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[string][]string) (instances []types.Instance, err error) {
+	var filters []types.Filter
+
+	for tagName, tagValues := range(tags) {
+		tagKeyName := fmt.Sprintf("tag:%s", tagName)
+		filter := types.Filter{
+			Name: &tagKeyName,
+			Values: tagValues,
+		}
+		filters = append(filters, filter)
+	}
+	describeInstancesInput := &ec2.DescribeInstancesInput{
+		Filters: filters,
+	}
+	output, err := client.DescribeInstances(ctx, describeInstancesInput)
+	if err != nil {
+		return nil, err
+	} else if output == nil{
+		return
+	}
+	reservations := output.Reservations
+	for _, reservation := range(reservations) {
+		for _, instance := range(reservation.Instances) {
+			instances = append(instances, instance)
+		}
+	}
+	return
+}
+
+type AssertEC2InstancesSubnetBalancedByTagInput struct {
+	// A map of string values that define the tag keys and values on which to retrieve the EC2 instances.
+	TagValues map[string]string
+}
+//func AssertEC2InstancesSubnetBalancedByTag(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2InstancesSubnetBalancedInput)
