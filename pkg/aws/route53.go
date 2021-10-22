@@ -7,8 +7,7 @@ import (
 )
 
 // Route53Client is an AWS Route53 API client.
-// Typically, it's a [Route53](https://docs.aws.amazon.com/sdk-for-go/api/service/route53/#Route53)
-// as returned by `Route53.New`.
+// Typically, it's a [Route53](https://docs.aws.amazon.com/sdk-for-go/api/service/route53/#Route53).
 type Route53Client interface {
 	ListHostedZonesByName(*route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
 }
