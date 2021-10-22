@@ -131,6 +131,7 @@ func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, inpu
 		if tagKey == input.TagName {
 			hasMatch = true
 			assert.Equal(t, input.Value, tagValue, "Tag with key '%s' does not match expected value.", tagKey)
+			break
 		}
 	}
 	assert.True(t, hasMatch, "Tag with key '%s' does not exist.", input.TagName)
