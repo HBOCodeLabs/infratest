@@ -22,21 +22,21 @@ type StatementEntry struct {
 	Resource interface{}
 }
 
-// AssertIAMPolicyContainsResourceAction asserts that the provided IAM Policy Document contains a Statement with the given Resource, Action, and Effect.
-// If such a Statement does not exist within the Policy, the test fails immediately.
-func AssertIAMPolicyContainsResourceAction(t *testing.T, resource string, action string, effect string, policyDocument PolicyDocument) {
+// AssertIAMPolicyDocumentContainsResourceAction will assert the an IAM Policy Document provided contains a Statement with the given Resource, Action, and Effect.
+// If such a Statement does not exist within the Policy the test will immediately fail.
+func AssertIAMPolicyDocumentContainsResourceAction(t *testing.T, resource string, action string, effect string, policyDocument PolicyDocument) {
 
-	if !checkIAMPolicyContainsResourceAction(resource, action, effect, policyDocument) {
+	if !checkIAMPolicyDocumentContainsResourceAction(resource, action, effect, policyDocument) {
 		t.Logf("Could not locate combination of resource '%s', action '%s', effect '%s' in provided policy document.", resource, action, effect)
 		t.Fail()
 	}
 }
 
-// AssertIAMPoliciesContainResourceAction asserts _at least one_ of the provided IAM Policy Documents contains a Statement with the given Resource, Action, and Effect.
-// If such a Statement does not exist within the provided Policies, the test fails immediately.
-func AssertIAMPoliciesContainResourceAction(t *testing.T, resource string, action string, effect string, policyDocuments []PolicyDocument) {
+// AssertIAMPolicyDocumentsContainsResourceAction will assert the _at least one_ IAM Policy Document in a provided set contains a Statement with the given Resource, Action, and Effect.
+// If such a Statement does not exist within the provided Policies the test will immediately fail.
+func AssertIAMPolicyDocumentsContainResourceAction(t *testing.T, resource string, action string, effect string, policyDocuments []PolicyDocument) {
 	for i := 0; i < len(policyDocuments); i++ {
-		if checkIAMPolicyContainsResourceAction(resource, action, effect, policyDocuments[i]) {
+		if checkIAMPolicyDocumentContainsResourceAction(resource, action, effect, policyDocuments[i]) {
 			return
 		}
 	}
@@ -45,8 +45,8 @@ func AssertIAMPoliciesContainResourceAction(t *testing.T, resource string, actio
 	t.Fail()
 }
 
-// checkIAMPolicyContainsResourceAction checks if a provided Policy Document contains a given Resource, Action, and Effect combination.
-func checkIAMPolicyContainsResourceAction(resource string, action string, effect string, policyDocument PolicyDocument) bool {
+// checkIAMPolicyDocumentContainsResourceAction checks if a provided Policy Document contains a given Resource, Action, and Effect combination.
+func checkIAMPolicyDocumentContainsResourceAction(resource string, action string, effect string, policyDocument PolicyDocument) bool {
 	resourceIndex := 0
 	statements := policyDocument.Statement
 	for resourceIndex != -1 {
