@@ -4,7 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/aws/aws-sdk-go-v2/service/route53/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,7 @@ func NewMockClient(listHostedZonesOutput *route53.ListHostedZonesOutput, err err
 	}
 }
 
-func (c Route53ClientMock) ListHostedZonesByName(listHostedZonesByNameInput *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
+func (c Route53ClientMock) ListHostedZonesByNameInput(listHostedZonesByNameInput *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
 	return c.listHostedZonesOutput, c.err
 }
 
@@ -44,8 +45,8 @@ func TestAssertRoute53HostedZoneExists_Found(t *testing.T) {
 	fakeTest := &testing.T{}
 	name := "foo.com"
 	client := NewMockClient(&route53.ListHostedZonesOutput{
-		HostedZones: []*route53.HostedZone{
-			&route53.HostedZone{
+		HostedZones: []types.HostedZone{
+			types.HostedZone{
 				Name: &name,
 			},
 		},
