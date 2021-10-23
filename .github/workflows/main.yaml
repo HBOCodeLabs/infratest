@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run tests
-        run: go test -v ./...
+        run: make
       - name: Generate semantic version
         id: generate-version
         uses: paulhatch/semantic-version@v4.0.2

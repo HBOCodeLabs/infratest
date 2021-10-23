@@ -1,10 +1,9 @@
 name: Validate Pull Request
-on: 
+on:
   pull_request:
-    paths: 
+    paths:
       - pkg/**
       - go.*
-
   workflow_dispatch:
 jobs:
   test:
@@ -18,7 +17,7 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v2
       - name: Run tests
-        run: go test -v ./...
+        run: make
       # Left here for future consideration
       # - name: Comment PR
       #   uses: thollander/actions-comment-pull-request@v1
