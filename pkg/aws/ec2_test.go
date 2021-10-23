@@ -14,7 +14,7 @@ type EC2ClientMock struct {
 	DescribeInstancesOutput *ec2.DescribeInstancesOutput
 	DescribeVolumesOutput   *ec2.DescribeVolumesOutput
 	DescribeTagsOutput      *ec2.DescribeTagsOutput
-	Test 										*testing.T
+	Test                    *testing.T
 }
 
 func (c EC2ClientMock) DescribeInstances(ctx context.Context, input *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
@@ -28,10 +28,10 @@ func (c EC2ClientMock) DescribeVolumes(ctx context.Context, input *ec2.DescribeV
 func (c EC2ClientMock) DescribeTags(ctx context.Context, input *ec2.DescribeTagsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTagsOutput, error) {
 	hasInstanceResourceTypeFilter := false
 	resourceTypeFilterName := "resource-type"
-	for _, filter := range(input.Filters) {
+	for _, filter := range input.Filters {
 		filterName := filter.Name
 		if *filterName == resourceTypeFilterName {
-			for _, value := range(filter.Values) {
+			for _, value := range filter.Values {
 				if value == "instance" {
 					hasInstanceResourceTypeFilter = true
 				}
@@ -258,20 +258,20 @@ func TestAssertEC2TagValueE_NoMatch(t *testing.T) {
 		NextToken: &nextToken,
 		Tags: []types.TagDescription{
 			{
-				ResourceId: &instanceID,
+				ResourceId:   &instanceID,
 				ResourceType: types.ResourceTypeInstance,
-				Key: &tagName,
-				Value: &wrongTagValue,
+				Key:          &tagName,
+				Value:        &wrongTagValue,
 			},
 		},
 	}
 	clientMock := &EC2ClientMock{
 		DescribeTagsOutput: describeTagsOutput,
-		Test: t,
+		Test:               t,
 	}
 	describeTagsInput := AssertEC2TagValueEInput{
-		TagName: tagName,
-		Value: tagValue,
+		TagName:    tagName,
+		Value:      tagValue,
 		InstanceID: instanceID,
 	}
 	ctx := context.Background()
@@ -294,20 +294,20 @@ func TestAssertEC2TagValueE_Match(t *testing.T) {
 		NextToken: &nextToken,
 		Tags: []types.TagDescription{
 			{
-				ResourceId: &instanceID,
+				ResourceId:   &instanceID,
 				ResourceType: types.ResourceTypeInstance,
-				Key: &tagName,
-				Value: &tagValue,
+				Key:          &tagName,
+				Value:        &tagValue,
 			},
 		},
 	}
 	clientMock := &EC2ClientMock{
 		DescribeTagsOutput: describeTagsOutput,
-		Test: t,
+		Test:               t,
 	}
 	describeTagsInput := AssertEC2TagValueEInput{
-		TagName: tagName,
-		Value: tagValue,
+		TagName:    tagName,
+		Value:      tagValue,
 		InstanceID: instanceID,
 	}
 	ctx := context.Background()

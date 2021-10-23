@@ -77,7 +77,7 @@ func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2Ta
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
-				Name: &resourceTypeFilterName,
+				Name:   &resourceTypeFilterName,
 				Values: []string{resourceTypeFilterValue},
 			},
 		},
@@ -87,7 +87,7 @@ func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2Ta
 		return false, err
 	}
 	hasTagMatch := false
-	for _, tag := range(describeTagsOutput.Tags) {
+	for _, tag := range describeTagsOutput.Tags {
 		tagKey := tag.Key
 		tagValue := tag.Value
 		if *tagKey == input.TagName {
