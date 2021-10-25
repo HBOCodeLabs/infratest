@@ -239,6 +239,8 @@ type AssertEC2InstancesSubnetBalancedInput struct {
 // subnet list'.
 func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
 	subnetListLength := len(input.Subnets)
+	assert.Greater(t, subnetListLength, 0, "The provided subnet list does not contain any elements.")
+	assert.Greater(t, len(input.Instances), 0, "The provided instance list does not contain any elements.")
 	for instanceIndex, instance := range(input.Instances) {
 		acutalSubnetID := instance.SubnetId
 		expectedSubnetID := input.Subnets[instanceIndex % subnetListLength].SubnetId
