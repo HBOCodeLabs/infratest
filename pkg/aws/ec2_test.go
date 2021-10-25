@@ -157,7 +157,6 @@ func TestAssertEC2VolumeEncrypted_Match(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-
 func TestAssertEC2VolumeEncryptedE_NoMatch(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
@@ -476,20 +475,20 @@ func TestAssertEC2TagValue_NoMatch(t *testing.T) {
 		NextToken: &nextToken,
 		Tags: []types.TagDescription{
 			{
-				ResourceId: &instanceID,
+				ResourceId:   &instanceID,
 				ResourceType: types.ResourceTypeInstance,
-				Key: &tagName,
-				Value: &wrongTagValue,
+				Key:          &tagName,
+				Value:        &wrongTagValue,
 			},
 		},
 	}
 	clientMock := &EC2ClientMock{
 		DescribeTagsOutput: describeTagsOutput,
-		Test: t,
+		Test:               t,
 	}
 	describeTagsInput := AssertEC2TagValueInput{
-		TagName: tagName,
-		Value: tagValue,
+		TagName:    tagName,
+		Value:      tagValue,
 		InstanceID: instanceID,
 	}
 	ctx := context.Background()
@@ -583,20 +582,20 @@ func TestAssertEC2TagValue_Match(t *testing.T) {
 		NextToken: &nextToken,
 		Tags: []types.TagDescription{
 			{
-				ResourceId: &instanceID,
+				ResourceId:   &instanceID,
 				ResourceType: types.ResourceTypeInstance,
-				Key: &tagName,
-				Value: &tagValue,
+				Key:          &tagName,
+				Value:        &tagValue,
 			},
 		},
 	}
 	clientMock := &EC2ClientMock{
 		DescribeTagsOutput: describeTagsOutput,
-		Test: t,
+		Test:               t,
 	}
 	describeTagsInput := AssertEC2TagValueInput{
-		TagName: tagName,
-		Value: tagValue,
+		TagName:    tagName,
+		Value:      tagValue,
 		InstanceID: instanceID,
 	}
 	ctx := context.Background()
@@ -612,12 +611,12 @@ func TestGetEC2InstancesByTag(t *testing.T) {
 	tagName := "myTag"
 	tagKeyName := fmt.Sprintf("tag:%s", tagName)
 	tagValues := []string{"myValue1", "myValuy2"}
-	tags := map[string][]string {
+	tags := map[string][]string{
 		tagName: tagValues,
 	}
 	filters := []types.Filter{
 		{
-			Name: &tagKeyName,
+			Name:   &tagKeyName,
 			Values: tagValues,
 		},
 	}
@@ -643,21 +642,19 @@ func TestGetEC2InstancesByTag(t *testing.T) {
 		},
 	}
 	clientMock := &EC2ClientMock{
-		DescribeInstancesInput: expectedInput,
+		DescribeInstancesInput:  expectedInput,
 		DescribeInstancesOutput: output,
-		Test: t,
+		Test:                    t,
 	}
 	ctx := context.Background()
 
 	// Execute
 	actualOutput, err := getEC2InstancesByTagE(ctx, clientMock, tags)
 
-
 	// Assert
 	assert.Nil(t, err, "getEC2InstancesByTagE returned an unexpected error")
 	assert.ElementsMatch(t, expectedOutput, actualOutput, "getEC2InstancesByTagE did not return the expected results")
 }
-
 
 func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
 	subnetID1 := "s123456"
@@ -676,27 +673,27 @@ func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
 	instances := []types.Instance{
 		{
 			InstanceId: &instanceID1,
-			SubnetId: &subnetID1,
+			SubnetId:   &subnetID1,
 		},
 		{
 			InstanceId: &instanceID2,
-			SubnetId: &subnetID2,
+			SubnetId:   &subnetID2,
 		},
 		{
 			InstanceId: &instanceID3,
-			SubnetId: &subnetID1,
+			SubnetId:   &subnetID1,
 		},
 	}
 	input := AssertEC2InstancesSubnetBalancedInput{
 		Instances: instances,
-		Subnets: subnets,
+		Subnets:   subnets,
 	}
 	fakeTest := &testing.T{}
 	ctx := context.Background()
-	
+
 	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
 
-	assert.False(t, fakeTest.Failed())	
+	assert.False(t, fakeTest.Failed())
 }
 
 func TestCreateFiltersFromMap(t *testing.T) {
@@ -711,16 +708,16 @@ func TestCreateFiltersFromMap(t *testing.T) {
 		"else",
 	}
 	inputMap := map[string][]string{
-		filterKey: filterValues,
+		filterKey:  filterValues,
 		filterKey2: filterValues2,
 	}
 	expectedOutput := []types.Filter{
 		{
-			Name: &filterKey,
+			Name:   &filterKey,
 			Values: filterValues,
 		},
 		{
-			Name: &filterKey2,
+			Name:   &filterKey2,
 			Values: filterValues2,
 		},
 	}

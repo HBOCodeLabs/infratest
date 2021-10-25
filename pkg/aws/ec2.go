@@ -201,10 +201,10 @@ func getEC2VolumeByVolumeIDE(ctx context.Context, client EC2Client, VolumeID str
 func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[string][]string) (instances []types.Instance, err error) {
 	var filters []types.Filter
 
-	for tagName, tagValues := range(tags) {
+	for tagName, tagValues := range tags {
 		tagKeyName := fmt.Sprintf("tag:%s", tagName)
 		filter := types.Filter{
-			Name: &tagKeyName,
+			Name:   &tagKeyName,
 			Values: tagValues,
 		}
 		filters = append(filters, filter)
@@ -215,12 +215,12 @@ func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[strin
 	output, err := client.DescribeInstances(ctx, describeInstancesInput)
 	if err != nil {
 		return nil, err
-	} else if output == nil{
+	} else if output == nil {
 		return
 	}
 	reservations := output.Reservations
-	for _, reservation := range(reservations) {
-		for _, instance := range(reservation.Instances) {
+	for _, reservation := range reservations {
+		for _, instance := range reservation.Instances {
 			instances = append(instances, instance)
 		}
 	}
@@ -234,16 +234,17 @@ type AssertEC2InstancesSubnetBalancedInput struct {
 	// A list of subnets
 	Subnets []types.Subnet
 }
+
 // AssertEC2InstancesBalancedInSubnets asserts that EC2 instances in a list are spread evenly throughout a list of subnets,
-// such that instance number 'x' in the list should be placed in the subnet with an index of 'x modulus the length of the 
+// such that instance number 'x' in the list should be placed in the subnet with an index of 'x modulus the length of the
 // subnet list'.
 func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
 	subnetListLength := len(input.Subnets)
 	assert.Greater(t, subnetListLength, 0, "The provided subnet list does not contain any elements.")
 	assert.Greater(t, len(input.Instances), 0, "The provided instance list does not contain any elements.")
-	for instanceIndex, instance := range(input.Instances) {
+	for instanceIndex, instance := range input.Instances {
 		acutalSubnetID := instance.SubnetId
-		expectedSubnetID := input.Subnets[instanceIndex % subnetListLength].SubnetId
+		expectedSubnetID := input.Subnets[instanceIndex%subnetListLength].SubnetId
 		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.")
 	}
 }
@@ -255,7 +256,7 @@ func CreateFiltersFromMap(input map[string][]string) (output []types.Filter) {
 		// This is required since the value of the filterKey variable changes, and we have to pass a pointer.
 		filterKeyCopy := filterKey
 		filter := types.Filter{
-			Name: &filterKeyCopy,
+			Name:   &filterKeyCopy,
 			Values: filterValues,
 		}
 		output = append(output, filter)
