@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.12.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.7.0
+	github.com/aws/aws-sdk-go-v2/service/route53 v1.12.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/stretchr/testify v1.6.1
