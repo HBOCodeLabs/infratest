@@ -245,3 +245,16 @@ func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, inpu
 		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.")
 	}
 }
+
+// CreateFiltersFromMap is a utility method that creates a Filter object from a map of strings.
+// It's designed to make creating filter objects easier without worrying about pointers and the like.
+func CreateFiltersFromMap(input map[string][]string) (output []types.Filter) {
+	for filterKey, filterValues := range input {
+		filter := types.Filter{
+			Name: &filterKey,
+			Values: filterValues,
+		}
+		output = append(output, filter)
+	}
+	return
+}
