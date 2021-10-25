@@ -22,8 +22,8 @@ type StatementEntry struct {
 	Resource interface{}
 }
 
-// AssertIAMPolicyContainsResourceAction will assert the an IAM Policy Document provided contains a Statement with the given Resource, Action, and Effect.
-// If such a Statement does not exist within the Policy the test will immediately fail.
+// AssertIAMPolicyContainsResourceAction asserts that the provided IAM Policy Document contains a Statement with the given Resource, Action, and Effect.
+// If such a Statement does not exist within the Policy, the test fails immediately.
 func AssertIAMPolicyContainsResourceAction(t *testing.T, resource string, action string, effect string, policyDocument PolicyDocument) {
 
 	if !checkIAMPolicyContainsResourceAction(resource, action, effect, policyDocument) {
@@ -32,8 +32,8 @@ func AssertIAMPolicyContainsResourceAction(t *testing.T, resource string, action
 	}
 }
 
-// AssertIAMPoliciesContainsResourceAction will assert the _at least one_ IAM Policy Document in a provided set contains a Statement with the given Resource, Action, and Effect.
-// If such a Statement does not exist within the provided Policies the test will immediately fail.
+// AssertIAMPoliciesContainResourceAction asserts _at least one_ of the provided IAM Policy Documents contains a Statement with the given Resource, Action, and Effect.
+// If such a Statement does not exist within the provided Policies, the test fails immediately.
 func AssertIAMPoliciesContainResourceAction(t *testing.T, resource string, action string, effect string, policyDocuments []PolicyDocument) {
 	for i := 0; i < len(policyDocuments); i++ {
 		if checkIAMPolicyContainsResourceAction(resource, action, effect, policyDocuments[i]) {
@@ -63,7 +63,7 @@ func checkIAMPolicyContainsResourceAction(resource string, action string, effect
 	return false
 }
 
-// Gets the current version of the IAM Policy for a given ARN.
+// getIAMPolicyDefaultVersionE gets the current version of the IAM Policy for a given ARN.
 func getIAMPolicyDefaultVersionE(context context.Context, policyArn string, client *iam.Client) (PolicyDocument, error) {
 	IAMGetPolicyInput := &iam.GetPolicyInput{
 		PolicyArn: &policyArn,
@@ -73,10 +73,10 @@ func getIAMPolicyDefaultVersionE(context context.Context, policyArn string, clie
 		return PolicyDocument{}, err
 	}
 
-	IAMPolicyDefaultVersionId := IAMPolicyOutput.Policy.DefaultVersionId
+	iamPolicyDefaultVersionID := IAMPolicyOutput.Policy.DefaultVersionId
 	IAMPolicyDefaultVersion, err := client.GetPolicyVersion(context, &iam.GetPolicyVersionInput{
 		PolicyArn: &policyArn,
-		VersionId: IAMPolicyDefaultVersionId,
+		VersionId: iamPolicyDefaultVersionID,
 	})
 	if err != nil {
 		return PolicyDocument{}, err
@@ -142,7 +142,7 @@ func findIamPolicyAction(statement StatementEntry, action string, effect string)
 	return -1
 }
 
-// Returns the index (zero based) of the Statement that contains a given Resource within an IAM Policy's Statement collection, starting at the index given.
+// findIAMPolicyResource returns the index (zero based) of the Statement that contains a given Resource within an IAM Policy's Statement collection, starting at the index given.
 // If the resource is not found, it will return a value of -1.
 func findIAMPolicyResource(statements []StatementEntry, resource string, startIndex int) int {
 	for i := startIndex; i < len(statements); i++ {
@@ -157,7 +157,7 @@ func findIAMPolicyResource(statements []StatementEntry, resource string, startIn
 	return -1
 }
 
-// ParseIAMPolicyField will take an input and return either a single element array (if the passed input is a string)
+// ParseIAMPolicyField takes an input and returns a single element array (if the passed input is a string)
 // or an array of strings (if the passed input is an array). This is because the Resource and Action fields of an IAM Policy document statement
 // can either be a single string or an array of strings.
 func parseIAMPolicyField(field interface{}) []string {
