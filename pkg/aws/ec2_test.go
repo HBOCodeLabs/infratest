@@ -701,17 +701,27 @@ func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
 
 func TestCreateFiltersFromMap(t *testing.T) {
 	filterKey := "key"
+	filterKey2 := "otherkey"
 	filterValues := []string{
 		"hello",
 		"there",
 	}
+	filterValues2 := []string{
+		"something",
+		"else",
+	}
 	inputMap := map[string][]string{
 		filterKey: filterValues,
+		filterKey2: filterValues2,
 	}
 	expectedOutput := []types.Filter{
 		{
 			Name: &filterKey,
 			Values: filterValues,
+		},
+		{
+			Name: &filterKey2,
+			Values: filterValues2,
 		},
 	}
 

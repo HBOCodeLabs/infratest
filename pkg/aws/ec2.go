@@ -252,8 +252,10 @@ func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, inpu
 // It's designed to make creating filter objects easier without worrying about pointers and the like.
 func CreateFiltersFromMap(input map[string][]string) (output []types.Filter) {
 	for filterKey, filterValues := range input {
+		// This is required since the value of the filterKey variable changes, and we have to pass a pointer.
+		filterKeyCopy := filterKey
 		filter := types.Filter{
-			Name: &filterKey,
+			Name: &filterKeyCopy,
 			Values: filterValues,
 		}
 		output = append(output, filter)
