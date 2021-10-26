@@ -40,7 +40,7 @@ type AssertEC2TagValueEInput struct {
 	InstanceID string
 }
 
-// AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method. This is deprecated.
+// AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method.
 type AssertEC2TagValueInput struct {
 	// The name of the tag to assert exists.
 	TagName string
@@ -84,6 +84,7 @@ func AssertEC2VolumeEncryptedE(ctx context.Context, client EC2Client, input Asse
 	return
 }
 
+// AssertEC2VolumeEncrypted asserts that an EBS volume is encrypted, optionally using a specified KMS key.
 func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2VolumeEncryptedInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
@@ -175,7 +176,7 @@ func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, Instance
 		return types.Instance{}, err
 	}
 	if len(describeInstancesOutput.Reservations) == 0 {
-		err = fmt.Errorf("Instance with ID '%s' was not found.", InstanceID)
+		err = fmt.Errorf("instance with ID '%s' was not found", InstanceID)
 		return types.Instance{}, err
 	}
 	instance := describeInstancesOutput.Reservations[0].Instances[0]
@@ -191,7 +192,7 @@ func getEC2VolumeByVolumeIDE(ctx context.Context, client EC2Client, VolumeID str
 		return types.Volume{}, err
 	}
 	if len(describeVolumesOutput.Volumes) == 0 {
-		err = fmt.Errorf("Volume with ID '%s' was not found.", VolumeID)
+		err = fmt.Errorf("volume with ID '%s' was not found", VolumeID)
 		return types.Volume{}, err
 	}
 	volume := describeVolumesOutput.Volumes[0]
@@ -220,9 +221,7 @@ func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[strin
 	}
 	reservations := output.Reservations
 	for _, reservation := range reservations {
-		for _, instance := range reservation.Instances {
-			instances = append(instances, instance)
-		}
+		instances = append(instances, reservation.Instances...)
 	}
 	return
 }

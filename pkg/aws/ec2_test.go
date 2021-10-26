@@ -65,12 +65,12 @@ func TestAssertEC2VolumeEncryptedE_Match(t *testing.T) {
 	encrypted := true
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -84,7 +84,7 @@ func TestAssertEC2VolumeEncryptedE_Match(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID,
 			},
@@ -116,12 +116,12 @@ func TestAssertEC2VolumeEncrypted_Match(t *testing.T) {
 	encrypted := true
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -135,7 +135,7 @@ func TestAssertEC2VolumeEncrypted_Match(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID,
 			},
@@ -166,12 +166,12 @@ func TestAssertEC2VolumeEncryptedE_NoMatch(t *testing.T) {
 	encrypted := false
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -185,7 +185,7 @@ func TestAssertEC2VolumeEncryptedE_NoMatch(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID,
 			},
@@ -217,12 +217,12 @@ func TestAssertEC2VolumeEncrypted_NoMatch(t *testing.T) {
 	encrypted := false
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -236,7 +236,7 @@ func TestAssertEC2VolumeEncrypted_NoMatch(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID,
 			},
@@ -267,12 +267,12 @@ func TestAssertEC2VolumeEncryptedE_MatchWithKMSKeyID(t *testing.T) {
 	encrypted := true
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -286,7 +286,7 @@ func TestAssertEC2VolumeEncryptedE_MatchWithKMSKeyID(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID,
 			},
@@ -318,12 +318,12 @@ func TestAssertEC2VolumeEncrypted_MatchWithKMSKeyID(t *testing.T) {
 	encrypted := true
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -337,7 +337,7 @@ func TestAssertEC2VolumeEncrypted_MatchWithKMSKeyID(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID,
 			},
@@ -370,12 +370,12 @@ func TestAssertEC2VolumeEncryptedE_NoMatchWithKMSKeyID(t *testing.T) {
 	encrypted := true
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -389,7 +389,7 @@ func TestAssertEC2VolumeEncryptedE_NoMatchWithKMSKeyID(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID2,
 			},
@@ -422,12 +422,12 @@ func TestAssertEC2VolumeEncrypted_NoMatchWithKMSKeyID(t *testing.T) {
 	encrypted := true
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
-			types.Reservation{
+			{
 				Instances: []types.Instance{
-					types.Instance{
+					{
 						InstanceId: &instanceID,
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
-							types.InstanceBlockDeviceMapping{
+							{
 								DeviceName: &deviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
@@ -441,7 +441,7 @@ func TestAssertEC2VolumeEncrypted_NoMatchWithKMSKeyID(t *testing.T) {
 	}
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
-			types.Volume{
+			{
 				Encrypted: &encrypted,
 				KmsKeyId:  &kmsKeyID2,
 			},
