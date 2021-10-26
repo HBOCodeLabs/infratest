@@ -724,5 +724,5 @@ func TestCreateFiltersFromMap(t *testing.T) {
 
 	actualOutput := CreateFiltersFromMap(inputMap)
 
-	assert.Equal(t, expectedOutput, actualOutput)
+	assert.ElementsMatch(t, expectedOutput, actualOutput)
 }
