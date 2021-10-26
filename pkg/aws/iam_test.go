@@ -1,3 +1,5 @@
+// Copyright (c) WarnerMedia Direct, LLC. All rights reserved. Licensed under the MIT license.
+// See the LICENSE file for license information.
 package aws
 
 import (
@@ -141,7 +143,7 @@ func TestCheckIAMPolicyContainsResourceAction_Single(t *testing.T) {
 		},
 	}
 
-	found := checkIAMPolicyContainsResourceAction(resource, action, effect, policyDocument)
+	found := checkIAMPolicyDocumentContainsResourceAction(resource, action, effect, policyDocument)
 	assert.True(t, found)
 }
 
@@ -167,7 +169,7 @@ func TestCheckIAMPolicyContainsResourceAction_Multi(t *testing.T) {
 		},
 	}
 
-	found := checkIAMPolicyContainsResourceAction(resource, action, effect, policyDocument)
+	found := checkIAMPolicyDocumentContainsResourceAction(resource, action, effect, policyDocument)
 	assert.True(t, found)
 }
 
