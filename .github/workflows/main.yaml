@@ -7,6 +7,7 @@ on:
       - "README.md"
       - ".github/**"
       - "LICENSE"
+  workflow_dispatch:
 jobs:
   test:
     name: Test
@@ -26,7 +27,7 @@ jobs:
         id: generate-version
         uses: paulhatch/semantic-version@v4.0.2
         with:
-          tag_prefix: ""
+          tag_prefix: "v"
           format: "${major}.${minor}.${patch}"
       - name: Generate release
         uses: Roang-zero1/github-create-release-action@master
