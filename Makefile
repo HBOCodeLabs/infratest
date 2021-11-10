@@ -16,4 +16,5 @@ test: vet test-fmt
 
 mock:
 	~/go/bin/mockgen -source pkg/aws/dax.go -destination mock/dax.go -package mock
+	~/go/bin/mockgen -source pkg/aws/ec2.go -destination mock/ec2.go -package mock
 .PHONY: mock
