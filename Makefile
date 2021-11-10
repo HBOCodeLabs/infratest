@@ -13,3 +13,7 @@ test-fmt:
 test: vet test-fmt
 	go test -cover $(SOURCE) -count=1
 .PHONY: test
+
+mock:
+	~/go/bin/mockgen -source pkg/aws/dax.go -destination mock/dax.go -package mock
+.PHONY: mock
