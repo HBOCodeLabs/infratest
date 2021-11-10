@@ -17,6 +17,7 @@ type DAXClient interface {
 	DescribeClusters(context.Context, *dax.DescribeClustersInput, ...func(*dax.Options)) (*dax.DescribeClustersOutput, error)
 }
 
+// AssertDAXClusterEncrypted asserts that a DAX cluster has server side encryption enabled.
 func AssertDAXClusterEncrypted(t *testing.T, ctx context.Context, client DAXClient, name string) {
 	input := &dax.DescribeClustersInput{
 		ClusterNames: []string{name},
@@ -24,4 +25,14 @@ func AssertDAXClusterEncrypted(t *testing.T, ctx context.Context, client DAXClie
 	output, err := client.DescribeClusters(ctx, input)
 	assert.Nil(t, err)
 	assert.Equal(t, types.SSEStatusEnabled, output.Clusters[0].SSEDescription.Status)
+}
+
+//AssertDAXClusterSubnetGroup asserts that a DAX cluster has a given subnet group associated to it.
+func AssertDAXClusterSubnetGroup(t *testing.T, ctx context.Context, client DAXClient, name string, subnetGroupName string) {
+	input := &dax.DescribeClustersInput{
+		ClusterNames: []string{name},
+	}
+	output, err := client.DescribeClusters(ctx, input)
+	assert.Nil(t, err)
+	assert.Equal(t, subnetGroupName, *output.Clusters[0].SubnetGroup)
 }

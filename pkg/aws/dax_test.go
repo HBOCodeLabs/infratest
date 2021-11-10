@@ -94,3 +94,85 @@ func TestAssertDAXClusterEncrypted_Fail(t *testing.T) {
 	ctrl.Finish()
 	assert.True(t, fakeTest.Failed())
 }
+
+func TestAssertDAXClusterSubnetGroup_Matched(t *testing.T) {
+	// Setup
+	t.Parallel()
+
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockDAXClient(ctrl)
+	ctx := context.Background()
+
+	clusterName := "daxcluster"
+	subnetGroupName := "subnet-group"
+	expectedInput := &dax.DescribeClustersInput{
+		ClusterNames: []string{clusterName},
+	}
+	output := &dax.DescribeClustersOutput{
+		Clusters: []types.Cluster{
+			{
+				ClusterName: &clusterName,
+				SubnetGroup: &subnetGroupName,
+			},
+		},
+	}
+	client.EXPECT().
+		DescribeClusters(ctx, expectedInput).
+		Times(1).
+		DoAndReturn(
+			func(context.Context, *dax.DescribeClustersInput, ...func(*dax.Options)) (*dax.DescribeClustersOutput, error) {
+				return output, nil
+			},
+		)
+
+	// Execute
+	AssertDAXClusterSubnetGroup(fakeTest, ctx, client, clusterName, subnetGroupName)
+
+	// Assert
+	ctrl.Finish()
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertDAXClusterSubnetGroup_NotMatched(t *testing.T) {
+	// Setup
+	t.Parallel()
+
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockDAXClient(ctrl)
+	ctx := context.Background()
+
+	clusterName := "daxcluster"
+	expectedSubnetGroupName := "subnet-group"
+	actualSubnetGroupName := "other-subnet-group"
+
+	expectedInput := &dax.DescribeClustersInput{
+		ClusterNames: []string{clusterName},
+	}
+	output := &dax.DescribeClustersOutput{
+		Clusters: []types.Cluster{
+			{
+				ClusterName: &clusterName,
+				SubnetGroup: &actualSubnetGroupName,
+			},
+		},
+	}
+	client.EXPECT().
+		DescribeClusters(ctx, expectedInput).
+		Times(1).
+		DoAndReturn(
+			func(context.Context, *dax.DescribeClustersInput, ...func(*dax.Options)) (*dax.DescribeClustersOutput, error) {
+				return output, nil
+			},
+		)
+
+	// Execute
+	AssertDAXClusterSubnetGroup(fakeTest, ctx, client, clusterName, expectedSubnetGroupName)
+
+	// Assert
+	ctrl.Finish()
+	assert.True(t, fakeTest.Failed())
+}
