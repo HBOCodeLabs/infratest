@@ -19,20 +19,14 @@ type DAXClient interface {
 
 // AssertDAXClusterEncrypted asserts that a DAX cluster has server side encryption enabled.
 func AssertDAXClusterEncrypted(t *testing.T, ctx context.Context, client DAXClient, name string) {
-	input := &dax.DescribeClustersInput{
-		ClusterNames: []string{name},
-	}
-	output, err := client.DescribeClusters(ctx, input)
+	output, err := getDAXClusterByNameE(ctx, client, name)
 	assert.Nil(t, err)
 	assert.Equal(t, types.SSEStatusEnabled, output.Clusters[0].SSEDescription.Status)
 }
 
 // AssertDAXClusterSubnetGroup asserts that a DAX cluster has a given subnet group associated to it.
 func AssertDAXClusterSubnetGroup(t *testing.T, ctx context.Context, client DAXClient, name string, subnetGroupName string) {
-	input := &dax.DescribeClustersInput{
-		ClusterNames: []string{name},
-	}
-	output, err := client.DescribeClusters(ctx, input)
+	output, err := getDAXClusterByNameE(ctx, client, name)
 	assert.Nil(t, err)
 	assert.Equal(t, subnetGroupName, *output.Clusters[0].SubnetGroup)
 }
@@ -45,10 +39,7 @@ func AssertDAXClusterSecurityGroup(t *testing.T, ctx context.Context, client DAX
 	assert.NotNil(t, securityGroupOutput, "A security group with the specified name does not exist.")
 	expectedSecurityGroupID := *securityGroupOutput.GroupId
 
-	input := &dax.DescribeClustersInput{
-		ClusterNames: []string{name},
-	}
-	output, err := client.DescribeClusters(ctx, input)
+	output, err := getDAXClusterByNameE(ctx, client, name)
 	assert.Nil(t, err)
 
 	securityGroupMatchFound := false
@@ -58,4 +49,12 @@ func AssertDAXClusterSecurityGroup(t *testing.T, ctx context.Context, client DAX
 		}
 	}
 	assert.True(t, securityGroupMatchFound, "A security group with the name specified is not associated with the DAX cluster.")
+}
+
+func getDAXClusterByNameE(ctx context.Context, client DAXClient, name string) (output *dax.DescribeClustersOutput, err error) {
+	input := &dax.DescribeClustersInput{
+		ClusterNames: []string{name},
+	}
+	output, err = client.DescribeClusters(ctx, input)
+	return
 }
