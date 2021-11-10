@@ -18,6 +18,8 @@ type EC2Client interface {
 	DescribeVolumes(context.Context, *ec2.DescribeVolumesInput, ...func(*ec2.Options)) (*ec2.DescribeVolumesOutput, error)
 
 	DescribeTags(context.Context, *ec2.DescribeTagsInput, ...func(*ec2.Options)) (*ec2.DescribeTagsOutput, error)
+
+	DescribeSecurityGroups(context.Context, *ec2.DescribeSecurityGroupsInput, ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
 }
 
 // AssertEC2VolumeEncryptedInput is used as an input to the AssertEC2VolumeEncryptedE and AssertEC2VolumeEncrypted methods.
@@ -260,5 +262,28 @@ func CreateFiltersFromMap(input map[string][]string) (output []types.Filter) {
 		}
 		output = append(output, filter)
 	}
+	return
+}
+
+// GetEC2SecurityGroupByName returns a security group object based on the name provided. If no matching group
+// is found, it will return a nil value.
+func GetEC2SecurityGroupByName(ctx context.Context, client EC2Client, name string) (securityGroup *types.SecurityGroup, err error) {
+	filterKey := "group-name"
+	input := &ec2.DescribeSecurityGroupsInput{
+		Filters: []types.Filter{
+			{
+				Name: &filterKey,
+				Values: []string{name},
+			},
+		},
+	}
+	output, err := client.DescribeSecurityGroups(ctx, input) 
+	if err != nil {
+		return nil, err
+	}
+	if output == nil {
+		return nil, err
+	}
+	securityGroup = &output.SecurityGroups[0]
 	return
 }
