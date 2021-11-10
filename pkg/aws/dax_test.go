@@ -9,6 +9,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/dax"
 	"github.com/aws/aws-sdk-go-v2/service/dax/types"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	gomock "github.com/golang/mock/gomock"
 
@@ -175,4 +177,77 @@ func TestAssertDAXClusterSubnetGroup_NotMatched(t *testing.T) {
 	// Assert
 	ctrl.Finish()
 	assert.True(t, fakeTest.Failed())
+}
+
+func TestAssertDAXClusterSecurityGroup_Matched(t *testing.T) {
+	// Setup
+	t.Parallel()
+
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockDAXClient(ctrl)
+	ec2client := mock.NewMockEC2Client(ctrl)
+	ctx := context.Background()
+
+	clusterName := "daxcluster"
+	securityGroupName := "security-group"
+	securityGroupID := "asg123456"
+
+	expectedInput := &dax.DescribeClustersInput{
+		ClusterNames: []string{clusterName},
+	}
+	output := &dax.DescribeClustersOutput{
+		Clusters: []types.Cluster{
+			{
+				ClusterName: &clusterName,
+				SecurityGroups: []types.SecurityGroupMembership{
+					types.SecurityGroupMembership{
+						SecurityGroupIdentifier: &securityGroupID,
+					},
+				},
+			},
+		},
+	}
+	client.EXPECT().
+		DescribeClusters(ctx, expectedInput).
+		Times(1).
+		DoAndReturn(
+			func(context.Context, *dax.DescribeClustersInput, ...func(*dax.Options)) (*dax.DescribeClustersOutput, error) {
+				return output, nil
+			},
+		)
+
+	expectedEC2FilterKey := "group-name"
+	expectedEC2Input := &ec2.DescribeSecurityGroupsInput{
+		Filters: []ec2types.Filter{
+			{
+				Name:   &expectedEC2FilterKey,
+				Values: []string{securityGroupName},
+			},
+		},
+	}
+	ec2Output := &ec2.DescribeSecurityGroupsOutput{
+		SecurityGroups: []ec2types.SecurityGroup{
+			{
+				GroupId:   &securityGroupID,
+				GroupName: &securityGroupName,
+			},
+		},
+	}
+	ec2client.EXPECT().
+		DescribeSecurityGroups(ctx, expectedEC2Input).
+		Times(1).
+		DoAndReturn(
+			func(context.Context, *ec2.DescribeSecurityGroupsInput, ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error) {
+				return ec2Output, nil
+			},
+		)
+
+	// Execute
+	AssertDAXClusterSecurityGroup(fakeTest, ctx, client, ec2client, clusterName, securityGroupName)
+
+	// Assert
+	ctrl.Finish()
+	assert.False(t, fakeTest.Failed())
 }

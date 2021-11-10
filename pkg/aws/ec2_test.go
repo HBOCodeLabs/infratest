@@ -59,7 +59,7 @@ func (c EC2ClientMock) DescribeTags(ctx context.Context, input *ec2.DescribeTags
 }
 
 // This is a stub function; tests for this will use the new Mock object.
-func (c EC2ClientMock) DescribeSecurityGroups(ctx context.Context, input *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error){
+func (c EC2ClientMock) DescribeSecurityGroups(ctx context.Context, input *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error) {
 	return nil, nil
 }
 
@@ -745,7 +745,7 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 	expectedInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []types.Filter{
 			{
-				Name: &expectedFilterName,
+				Name:   &expectedFilterName,
 				Values: []string{securityGroupName},
 			},
 		},
@@ -767,10 +767,10 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 				return output, nil
 			},
 		)
-	
+
 	// Execute
 	actualOutput, err := GetEC2SecurityGroupByName(ctx, mockClient, securityGroupName)
-	
+
 	// Assert
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, actualOutput)

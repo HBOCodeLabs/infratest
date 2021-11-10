@@ -272,12 +272,12 @@ func GetEC2SecurityGroupByName(ctx context.Context, client EC2Client, name strin
 	input := &ec2.DescribeSecurityGroupsInput{
 		Filters: []types.Filter{
 			{
-				Name: &filterKey,
+				Name:   &filterKey,
 				Values: []string{name},
 			},
 		},
 	}
-	output, err := client.DescribeSecurityGroups(ctx, input) 
+	output, err := client.DescribeSecurityGroups(ctx, input)
 	if err != nil {
 		return nil, err
 	}
