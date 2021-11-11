@@ -9,6 +9,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/golang/mock/gomock"
+	"github.com/hbocodelabs/infratest/mock"
 	"github.com/stretchr/testify/assert"
 
 	"testing"
@@ -54,6 +56,11 @@ func (c EC2ClientMock) DescribeTags(ctx context.Context, input *ec2.DescribeTags
 	}
 	assert.True(c.Test, hasInstanceResourceTypeFilter, "DescribeTags was called without specifying a resource type filter.")
 	return c.DescribeTagsOutput, nil
+}
+
+// This is a stub function; tests for this will use the new Mock object.
+func (c EC2ClientMock) DescribeSecurityGroups(ctx context.Context, input *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error) {
+	return nil, nil
 }
 
 func TestAssertEC2VolumeEncryptedE_Match(t *testing.T) {
@@ -725,4 +732,46 @@ func TestCreateFiltersFromMap(t *testing.T) {
 	actualOutput := CreateFiltersFromMap(inputMap)
 
 	assert.ElementsMatch(t, expectedOutput, actualOutput)
+}
+
+func TestGetEC2SecurityGroupByNameE(t *testing.T) {
+	// Setup
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	mockClient := mock.NewMockEC2Client(ctrl)
+
+	securityGroupName := "security-group"
+	expectedFilterName := "group-name"
+	expectedInput := &ec2.DescribeSecurityGroupsInput{
+		Filters: []types.Filter{
+			{
+				Name:   &expectedFilterName,
+				Values: []string{securityGroupName},
+			},
+		},
+	}
+	output := &ec2.DescribeSecurityGroupsOutput{
+		SecurityGroups: []types.SecurityGroup{
+			{
+				GroupName: &securityGroupName,
+			},
+		},
+	}
+	expectedOutput := &types.SecurityGroup{
+		GroupName: &securityGroupName,
+	}
+	mockClient.EXPECT().DescribeSecurityGroups(ctx, expectedInput).
+		Times(1).
+		DoAndReturn(
+			func(context.Context, *ec2.DescribeSecurityGroupsInput, ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error) {
+				return output, nil
+			},
+		)
+
+	// Execute
+	actualOutput, err := GetEC2SecurityGroupByName(ctx, mockClient, securityGroupName)
+
+	// Assert
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, actualOutput)
 }
