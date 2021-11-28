@@ -28,10 +28,10 @@ func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName 
 	assert.True(t, found, fmt.Sprintf("'%s' not found", zoneName))
 }
 
-// AssertRoute53RecordExistsInHostedZone asserts whether or not the Route53 record
+// AssertRecordExistsInHostedZone asserts whether or not the Route53 record
 // name it's passed exists amongst those associated with the the Route53 zone whose
 // name it's passed.
-func AssertRoute53RecordExistsInHostedZone(t *testing.T, client Route53Client, recordName string, zoneName string) {
+func AssertRecordExistsInHostedZone(t *testing.T, client Route53Client, recordName string, zoneName string) {
 	recordFound := false
 
 	z, zoneFound, err := findZone(client, zoneName)
