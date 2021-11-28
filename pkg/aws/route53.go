@@ -22,7 +22,7 @@ type Route53Client interface {
 // AssertRoute53HostedZoneExists asserts whether or not the Route53 zone name
 // it's passed is found amongst those reported by the AWS API.
 func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName string) {
-	_, found, err := findZone(client, zoneName)
+	_, found, err := findZoneE(client, zoneName)
 
 	assert.Nil(t, err)
 	assert.True(t, found, fmt.Sprintf("'%s' not found", zoneName))
@@ -34,7 +34,7 @@ func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName 
 func AssertRecordExistsInHostedZone(t *testing.T, client Route53Client, recordName string, zoneName string) {
 	recordFound := false
 
-	z, zoneFound, err := findZone(client, zoneName)
+	z, zoneFound, err := findZoneE(client, zoneName)
 
 	assert.Nil(t, err)
 	assert.True(t, zoneFound, fmt.Sprintf("zone '%s' not found", zoneName))
@@ -59,7 +59,7 @@ func AssertRecordExistsInHostedZone(t *testing.T, client Route53Client, recordNa
 	assert.True(t, recordFound, fmt.Sprintf("record '%s' not found", recordName))
 }
 
-func findZone(client Route53Client, zoneName string) (*types.HostedZone, bool, error) {
+func findZoneE(client Route53Client, zoneName string) (*types.HostedZone, bool, error) {
 	zones, err := client.ListHostedZonesByNameInput(&route53.ListHostedZonesByNameInput{
 		DNSName: &zoneName,
 	})
