@@ -244,9 +244,9 @@ func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, inpu
 	assert.Greater(t, subnetListLength, 0, "The provided subnet list does not contain any elements.")
 	assert.Greater(t, len(input.Instances), 0, "The provided instance list does not contain any elements.")
 	for instanceIndex, instance := range input.Instances {
-		acutalSubnetID := instance.SubnetId
-		expectedSubnetID := input.Subnets[instanceIndex%subnetListLength].SubnetId
-		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.")
+		acutalSubnetID := *instance.SubnetId
+		expectedSubnetID := *input.Subnets[instanceIndex%subnetListLength].SubnetId
+		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.", *instance.InstanceId)
 	}
 }
 
