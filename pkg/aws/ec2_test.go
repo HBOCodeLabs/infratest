@@ -664,8 +664,8 @@ func TestGetEC2InstancesByTag(t *testing.T) {
 }
 
 func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
-	subnetID1 := "s123456"
-	subnetID2 := "s7891011"
+	subnetID1 := "s923456"
+	subnetID2 := "s789101"
 	subnets := []types.Subnet{
 		{
 			SubnetId: &subnetID1,
@@ -680,15 +680,15 @@ func TestAssertEC2InstancesSubnetBalanced_Matched(t *testing.T) {
 	instances := []types.Instance{
 		{
 			InstanceId: &instanceID1,
-			SubnetId:   &subnetID1,
-		},
-		{
-			InstanceId: &instanceID2,
 			SubnetId:   &subnetID2,
 		},
 		{
-			InstanceId: &instanceID3,
+			InstanceId: &instanceID2,
 			SubnetId:   &subnetID1,
+		},
+		{
+			InstanceId: &instanceID3,
+			SubnetId:   &subnetID2,
 		},
 	}
 	input := AssertEC2InstancesSubnetBalancedInput{

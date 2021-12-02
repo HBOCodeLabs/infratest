@@ -5,6 +5,7 @@ package aws
 import (
 	"context"
 	"fmt"
+	"sort"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -243,9 +244,18 @@ func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, inpu
 	subnetListLength := len(input.Subnets)
 	assert.Greater(t, subnetListLength, 0, "The provided subnet list does not contain any elements.")
 	assert.Greater(t, len(input.Instances), 0, "The provided instance list does not contain any elements.")
+
+	// We put all the subnet IDs in an array because this is how the aws_vpc_subnet_ids Terraform data source retrieves and sorts them,
+	// which is presumably a common way that the user would retrieve subnets to place instances in.
+	subnets := make([]string, 0)
+	for _, subnet := range input.Subnets {
+		subnets = append(subnets, *subnet.SubnetId)
+	}
+	sort.Strings(subnets)
+
 	for instanceIndex, instance := range input.Instances {
 		acutalSubnetID := *instance.SubnetId
-		expectedSubnetID := *input.Subnets[instanceIndex%subnetListLength].SubnetId
+		expectedSubnetID := subnets[instanceIndex%subnetListLength]
 		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.", *instance.InstanceId)
 	}
 }
