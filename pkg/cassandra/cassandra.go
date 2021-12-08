@@ -3,7 +3,6 @@
 package cassandra
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -30,19 +29,4 @@ func GetVaultSecrets() {
 
 	fmt.Println("secret is", byts)
 
-}
-
-func fetchSecret(store *secrets.VaultStore, path string) (string, error) {
-	secretBytes, err := store.Get(path)
-	if err != nil {
-		return "", err
-	}
-
-	var secretMap map[string]interface{}
-	err = json.Unmarshal(secretBytes, &secretMap)
-	if err != nil {
-		return "", err
-	}
-
-	return secretMap["value"].(string), nil
 }
