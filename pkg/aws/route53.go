@@ -3,6 +3,7 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -16,7 +17,7 @@ import (
 // Typically, it's a [Route53](https://docs.aws.amazon.com/sdk-for-go/api/service/route53/#Route53).
 type Route53Client interface {
 	ListHostedZonesByNameInput(*route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
-	ListResourceRecordSets(*route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error)
+	ListResourceRecordSets(context.Context, *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error)
 }
 
 // AssertRoute53HostedZoneExists asserts whether or not the Route53 zone name
@@ -31,7 +32,7 @@ func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName 
 // AssertRecordExistsInHostedZone asserts whether or not the Route53 record
 // name it's passed exists amongst those associated with the the Route53 zone whose
 // name it's passed.
-func AssertRecordExistsInHostedZone(t *testing.T, client Route53Client, recordName string, zoneName string) {
+func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordName string, zoneName string) {
 	recordFound := false
 
 	z, zoneFound, err := findZoneE(client, zoneName)
@@ -43,7 +44,7 @@ func AssertRecordExistsInHostedZone(t *testing.T, client Route53Client, recordNa
 		return
 	}
 
-	recs, err := client.ListResourceRecordSets(&route53.ListResourceRecordSetsInput{
+	recs, err := client.ListResourceRecordSets(ctx, &route53.ListResourceRecordSetsInput{
 		StartRecordName: &recordName,
 		HostedZoneId:    z.Id,
 	})

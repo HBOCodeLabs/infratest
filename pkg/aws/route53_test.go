@@ -3,6 +3,7 @@
 package aws
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -24,7 +25,7 @@ func (c Route53ClientMock) ListHostedZonesByNameInput(input *route53.ListHostedZ
 	return c.listHostedZonesOutput, c.listHostedZonesErr
 }
 
-func (c Route53ClientMock) ListResourceRecordSets(input *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error) {
+func (c Route53ClientMock) ListResourceRecordSets(ctx context.Context, input *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error) {
 	return c.listResourceRecordSetsOutput, c.listResourceRecordSetsErr
 }
 
@@ -91,7 +92,7 @@ func TestAssertRecordExistsInHostedZone_Found(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, client, recordName, zoneName)
+	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, recordName, zoneName)
 
 	assert.False(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to pass")
 }
@@ -115,7 +116,7 @@ func TestAssertRecordExistsInHostedZone_RecordNotFound(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, client, recordName, zoneName)
+	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, recordName, zoneName)
 
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
@@ -139,7 +140,7 @@ func TestAssertRecordExistsInHostedZone_ListResourceRecordSets_Error(t *testing.
 		listResourceRecordSetsErr: errors.New("some error"),
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, client, recordName, zoneName)
+	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, recordName, zoneName)
 
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
@@ -163,7 +164,7 @@ func TestAssertRecordExistsInHostedZone_ZoneNotFound(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, client, recordName, zoneName)
+	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, recordName, zoneName)
 
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
@@ -191,7 +192,7 @@ func TestAssertRecordExistsInHostedZone_ListHostedZonesByNameInput_Error(t *test
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, client, recordName, zoneName)
+	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, recordName, zoneName)
 
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
