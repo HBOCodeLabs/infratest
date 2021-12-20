@@ -29,11 +29,25 @@ func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName 
 	assert.True(t, found, fmt.Sprintf("'%s' not found", zoneName))
 }
 
+// AssertRecordInput is used as an input to the AssertRecordExistsInHostedZone method.
+type AssertRecordInput struct {
+	// The record name.
+	RecordName string
+
+	// The record type.
+	RecordType types.RRType
+
+	// The zone name.
+	ZoneName string
+}
+
 // AssertRecordExistsInHostedZone asserts whether or not the Route53 record
 // name it's passed exists amongst those associated with the the Route53 zone whose
 // name it's passed.
-func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordName string, zoneName string) {
+func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordInput AssertRecordInput) {
 	recordFound := false
+	zoneName := recordInput.ZoneName
+	recordName := recordInput.RecordName
 
 	z, zoneFound, err := findZoneE(client, zoneName)
 
@@ -51,7 +65,7 @@ func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Ro
 	assert.Nil(t, err)
 
 	for _, r := range recs.ResourceRecordSets {
-		if strings.ToLower(*r.Name) == strings.ToLower(recordName) {
+		if strings.ToLower(*r.Name) == strings.ToLower(recordName) && &recordInput.RecordType != nil && r.Type == recordInput.RecordType {
 			recordFound = true
 			break
 		}
