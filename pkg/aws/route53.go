@@ -20,9 +20,9 @@ type Route53Client interface {
 	ListResourceRecordSets(context.Context, *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error)
 }
 
-// AssertHostedZoneExists asserts whether or not the Route53 zone name
+// AssertRoute53HostedZoneExists asserts whether or not the Route53 zone name
 // it's passed is found amongst those reported by the AWS API.
-func AssertHostedZoneExists(t *testing.T, ctx context.Context, client Route53Client, zoneName string) {
+func AssertRoute53HostedZoneExists(t *testing.T, ctx context.Context, client Route53Client, zoneName string) {
 	_, found, err := findZoneE(ctx, client, zoneName)
 
 	assert.Nil(t, err)
@@ -41,10 +41,10 @@ type AssertRecordInput struct {
 	ZoneName string
 }
 
-// AssertRecordExistsInHostedZone asserts whether or not the Route53 record
+// AssertRoute53RecordExistsInHostedZone asserts whether or not the Route53 record
 // name it's passed exists amongst those associated with the the Route53 zone whose
 // name it's passed.
-func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordInput AssertRecordInput) {
+func AssertRoute53RecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordInput AssertRecordInput) {
 	recordFound := false
 	zoneName := recordInput.ZoneName
 	recordName := recordInput.RecordName
