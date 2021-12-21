@@ -8,6 +8,7 @@ enable testing across technologies such as:
   * EC2
   * IAM
   * RDS
+  * Route53
   * S3
   * DynamoDB
 * Databases such as:
