@@ -21,7 +21,7 @@ type Route53ClientMock struct {
 	listResourceRecordSetsErr    error
 }
 
-func (c Route53ClientMock) ListHostedZonesByNameInput(input *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
+func (c Route53ClientMock) ListHostedZonesByName(ctx context.Context, input *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
 	return c.listHostedZonesOutput, c.listHostedZonesErr
 }
 
@@ -35,7 +35,7 @@ func TestAssertHostedZoneExists_NotFound(t *testing.T) {
 		listHostedZonesOutput: &route53.ListHostedZonesOutput{},
 		listHostedZonesErr:    nil,
 	}
-	AssertHostedZoneExists(fakeTest, client, "bar.com")
+	AssertHostedZoneExists(fakeTest, context.Background(), client, "bar.com")
 
 	assert.True(t, fakeTest.Failed(), "expected AssertHostedZoneExists to fail")
 }
@@ -46,7 +46,7 @@ func TestAssertHostedZoneExists_Error(t *testing.T) {
 		listHostedZonesOutput: &route53.ListHostedZonesOutput{},
 		listHostedZonesErr:    errors.New("some error"),
 	}
-	AssertHostedZoneExists(fakeTest, client, "foo.com")
+	AssertHostedZoneExists(fakeTest, context.Background(), client, "foo.com")
 
 	assert.True(t, fakeTest.Failed(), "expected AssertHostedZoneExists to fail")
 }
@@ -64,7 +64,7 @@ func TestAssertHostedZoneExists_Found(t *testing.T) {
 		},
 		listHostedZonesErr: nil,
 	}
-	AssertHostedZoneExists(fakeTest, client, name)
+	AssertHostedZoneExists(fakeTest, context.Background(), client, name)
 
 	assert.False(t, fakeTest.Failed(), "expected AssertHostedZoneExists to pass")
 }
