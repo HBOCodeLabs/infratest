@@ -14,7 +14,7 @@ import (
 )
 
 // Route53Client is an AWS Route53 API client.
-// Typically, it's a [Route53](https://docs.aws.amazon.com/sdk-for-go/api/service/route53/#Route53).
+// Typically, it's a [Route53](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/route53#Client).
 type Route53Client interface {
 	ListHostedZonesByNameInput(*route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
 	ListResourceRecordSets(context.Context, *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error)
