@@ -16,14 +16,14 @@ import (
 // Route53Client is an AWS Route53 API client.
 // Typically, it's a [Route53](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/route53#Client).
 type Route53Client interface {
-	ListHostedZonesByNameInput(*route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
+	ListHostedZonesByName(context.Context, *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
 	ListResourceRecordSets(context.Context, *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error)
 }
 
 // AssertRoute53HostedZoneExists asserts whether or not the Route53 zone name
 // it's passed is found amongst those reported by the AWS API.
-func AssertRoute53HostedZoneExists(t *testing.T, client Route53Client, zoneName string) {
-	_, found, err := findZoneE(client, zoneName)
+func AssertRoute53HostedZoneExists(t *testing.T, ctx context.Context, client Route53Client, zoneName string) {
+	_, found, err := findZoneE(ctx, client, zoneName)
 
 	assert.Nil(t, err)
 	assert.True(t, found, fmt.Sprintf("'%s' not found", zoneName))
@@ -41,15 +41,15 @@ type AssertRecordInput struct {
 	ZoneName string
 }
 
-// AssertRecordExistsInHostedZone asserts whether or not the Route53 record
+// AssertRoute53RecordExistsInHostedZone asserts whether or not the Route53 record
 // name it's passed exists amongst those associated with the the Route53 zone whose
 // name it's passed.
-func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordInput AssertRecordInput) {
+func AssertRoute53RecordExistsInHostedZone(t *testing.T, ctx context.Context, client Route53Client, recordInput AssertRecordInput) {
 	recordFound := false
 	zoneName := recordInput.ZoneName
 	recordName := recordInput.RecordName
 
-	z, zoneFound, err := findZoneE(client, zoneName)
+	z, zoneFound, err := findZoneE(ctx, client, zoneName)
 
 	assert.Nil(t, err)
 	assert.True(t, zoneFound, fmt.Sprintf("zone '%s' not found", zoneName))
@@ -74,8 +74,8 @@ func AssertRecordExistsInHostedZone(t *testing.T, ctx context.Context, client Ro
 	assert.True(t, recordFound, fmt.Sprintf("record '%s' not found", recordName))
 }
 
-func findZoneE(client Route53Client, zoneName string) (*types.HostedZone, bool, error) {
-	zones, err := client.ListHostedZonesByNameInput(&route53.ListHostedZonesByNameInput{
+func findZoneE(ctx context.Context, client Route53Client, zoneName string) (*types.HostedZone, bool, error) {
+	zones, err := client.ListHostedZonesByName(ctx, &route53.ListHostedZonesByNameInput{
 		DNSName: &zoneName,
 	})
 	if err != nil {

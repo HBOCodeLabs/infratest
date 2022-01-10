@@ -21,7 +21,7 @@ type Route53ClientMock struct {
 	listResourceRecordSetsErr    error
 }
 
-func (c Route53ClientMock) ListHostedZonesByNameInput(input *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
+func (c Route53ClientMock) ListHostedZonesByName(ctx context.Context, input *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
 	return c.listHostedZonesOutput, c.listHostedZonesErr
 }
 
@@ -35,9 +35,9 @@ func TestAssertRoute53HostedZoneExists_NotFound(t *testing.T) {
 		listHostedZonesOutput: &route53.ListHostedZonesOutput{},
 		listHostedZonesErr:    nil,
 	}
-	AssertRoute53HostedZoneExists(fakeTest, client, "bar.com")
+	AssertRoute53HostedZoneExists(fakeTest, context.Background(), client, "bar.com")
 
-	assert.True(t, fakeTest.Failed(), "expected AssertRoute53HostedZoneExists to fail")
+	assert.True(t, fakeTest.Failed(), "expected AssertHostedZoneExists to fail")
 }
 
 func TestAssertRoute53HostedZoneExists_Error(t *testing.T) {
@@ -46,9 +46,9 @@ func TestAssertRoute53HostedZoneExists_Error(t *testing.T) {
 		listHostedZonesOutput: &route53.ListHostedZonesOutput{},
 		listHostedZonesErr:    errors.New("some error"),
 	}
-	AssertRoute53HostedZoneExists(fakeTest, client, "foo.com")
+	AssertRoute53HostedZoneExists(fakeTest, context.Background(), client, "foo.com")
 
-	assert.True(t, fakeTest.Failed(), "expected AssertRoute53HostedZoneExists to fail")
+	assert.True(t, fakeTest.Failed(), "expected AssertHostedZoneExists to fail")
 }
 
 func TestAssertRoute53HostedZoneExists_Found(t *testing.T) {
@@ -64,12 +64,12 @@ func TestAssertRoute53HostedZoneExists_Found(t *testing.T) {
 		},
 		listHostedZonesErr: nil,
 	}
-	AssertRoute53HostedZoneExists(fakeTest, client, name)
+	AssertRoute53HostedZoneExists(fakeTest, context.Background(), client, name)
 
-	assert.False(t, fakeTest.Failed(), "expected AssertRoute53HostedZoneExists to pass")
+	assert.False(t, fakeTest.Failed(), "expected AssertHostedZoneExists to pass")
 }
 
-func TestAssertRecordExistsInHostedZone_Found(t *testing.T) {
+func TestAssertRoute53RecordExistsInHostedZone_Found(t *testing.T) {
 	fakeTest := &testing.T{}
 	zoneName := "foo.com"
 	recordName := fmt.Sprintf("foo.%s", zoneName)
@@ -92,7 +92,7 @@ func TestAssertRecordExistsInHostedZone_Found(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
+	AssertRoute53RecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
 		RecordName: recordName,
 		ZoneName:   zoneName,
 	})
@@ -100,7 +100,7 @@ func TestAssertRecordExistsInHostedZone_Found(t *testing.T) {
 	assert.False(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to pass")
 }
 
-func TestAssertRecordExistsInHostedZone_RecordNotFound(t *testing.T) {
+func TestAssertRoute53RecordExistsInHostedZone_RecordNotFound(t *testing.T) {
 	fakeTest := &testing.T{}
 	zoneName := "foo.com"
 	recordName := fmt.Sprintf("foo.%s", zoneName)
@@ -119,7 +119,7 @@ func TestAssertRecordExistsInHostedZone_RecordNotFound(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
+	AssertRoute53RecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
 		RecordName: recordName,
 		ZoneName:   zoneName,
 	})
@@ -127,7 +127,7 @@ func TestAssertRecordExistsInHostedZone_RecordNotFound(t *testing.T) {
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
 
-func TestAssertRecordExistsInHostedZone_RecordTypeNotFound(t *testing.T) {
+func TestAssertRoute53RecordExistsInHostedZone_RecordTypeNotFound(t *testing.T) {
 	fakeTest := &testing.T{}
 	zoneName := "foo.com"
 	recordName := fmt.Sprintf("foo.%s", zoneName)
@@ -151,7 +151,7 @@ func TestAssertRecordExistsInHostedZone_RecordTypeNotFound(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
+	AssertRoute53RecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
 		RecordName: recordName,
 		RecordType: types.RRTypeSoa,
 		ZoneName:   zoneName,
@@ -160,7 +160,7 @@ func TestAssertRecordExistsInHostedZone_RecordTypeNotFound(t *testing.T) {
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
 
-func TestAssertRecordExistsInHostedZone_ListResourceRecordSets_Error(t *testing.T) {
+func TestAssertRoute53RecordExistsInHostedZone_ListResourceRecordSets_Error(t *testing.T) {
 	fakeTest := &testing.T{}
 	zoneName := "foo.com"
 	recordName := fmt.Sprintf("foo.%s", zoneName)
@@ -179,7 +179,7 @@ func TestAssertRecordExistsInHostedZone_ListResourceRecordSets_Error(t *testing.
 		listResourceRecordSetsErr: errors.New("some error"),
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
+	AssertRoute53RecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
 		RecordName: recordName,
 		ZoneName:   zoneName,
 	})
@@ -187,7 +187,7 @@ func TestAssertRecordExistsInHostedZone_ListResourceRecordSets_Error(t *testing.
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
 
-func TestAssertRecordExistsInHostedZone_ZoneNotFound(t *testing.T) {
+func TestAssertRoute53RecordExistsInHostedZone_ZoneNotFound(t *testing.T) {
 	fakeTest := &testing.T{}
 	zoneName := "foo.com"
 	recordName := fmt.Sprintf("foo.%s", zoneName)
@@ -206,7 +206,7 @@ func TestAssertRecordExistsInHostedZone_ZoneNotFound(t *testing.T) {
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
+	AssertRoute53RecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
 		RecordName: recordName,
 		ZoneName:   zoneName,
 	})
@@ -214,7 +214,7 @@ func TestAssertRecordExistsInHostedZone_ZoneNotFound(t *testing.T) {
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
 }
 
-func TestAssertRecordExistsInHostedZone_ListHostedZonesByNameInput_Error(t *testing.T) {
+func TestAssertRoute53RecordExistsInHostedZone_ListHostedZonesByNameInput_Error(t *testing.T) {
 	fakeTest := &testing.T{}
 	zoneName := "foo.com"
 	recordName := fmt.Sprintf("foo.%s", zoneName)
@@ -237,7 +237,7 @@ func TestAssertRecordExistsInHostedZone_ListHostedZonesByNameInput_Error(t *test
 		listResourceRecordSetsErr: nil,
 	}
 
-	AssertRecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
+	AssertRoute53RecordExistsInHostedZone(fakeTest, context.Background(), client, AssertRecordInput{
 		RecordName: recordName,
 		ZoneName:   zoneName,
 	})
