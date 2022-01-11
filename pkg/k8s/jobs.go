@@ -16,7 +16,7 @@ type JobClient interface {
 	Get(context.Context, string, metav1.GetOptions) (*apiv1.Job, error)
 }
 
-// GetJobClient returns a JobClient object given a path to a kubeconfig file and 
+// GetJobClient returns a JobClient object given a path to a kubeconfig file and
 // a namespace name. If a blank string is passed as the kubeconfig path, then
 // the method will use the path $HOME/.kube/config, where $HOME is the user's home
 // directory as determined by the OS.
@@ -31,7 +31,7 @@ func GetJobClient(kubeconfigPath string, namespace string) (client JobClient, er
 
 /*
 AssertJobSucceeds will start a Kubernetes Job using the provided client and spec, then after it completes will either
-fail the passed test (if the job fails) or pass the test if the job succeeds. It should be passed a 
+fail the passed test (if the job fails) or pass the test if the job succeeds. It should be passed a
 JobClient object and a Job object.
 
 Example:

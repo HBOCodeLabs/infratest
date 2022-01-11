@@ -45,7 +45,7 @@ func TestAssertJobSucceeds(t *testing.T) {
 	require.Nil(t, err)
 	jobSpec := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: jobName,
+			Name:      jobName,
 			Namespace: namespace,
 		},
 		Spec: batchv1.JobSpec{
@@ -54,7 +54,7 @@ func TestAssertJobSucceeds(t *testing.T) {
 					RestartPolicy: corev1.RestartPolicyNever,
 					Containers: []corev1.Container{
 						corev1.Container{
-							Name: jobName,
+							Name:  jobName,
 							Image: "ubuntu:latest",
 							Command: []string{
 								"/bin/bash",

@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/hbocodelabs/infratest/mock"
 	"github.com/stretchr/testify/assert"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/golang/mock/gomock"
-	"github.com/hbocodelabs/infratest/mock"
 )
 
 func TestAssertJobSucceeds_Succeeds(t *testing.T) {
@@ -25,7 +25,7 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 		},
 		Status: batchv1.JobStatus{
 			Succeeded: 0,
-			Failed: 0,
+			Failed:    0,
 		},
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
@@ -43,7 +43,7 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 	fakeTest := &testing.T{}
 
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
-	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error){
+	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error) {
 		returnJob := job.DeepCopy()
 		returnJob.Status.Succeeded = 1
 		return returnJob, nil
@@ -68,7 +68,7 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 		},
 		Status: batchv1.JobStatus{
 			Succeeded: 0,
-			Failed: 0,
+			Failed:    0,
 		},
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
@@ -86,7 +86,7 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 	fakeTest := &testing.T{}
 
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
-	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error){
+	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error) {
 		returnJob := job.DeepCopy()
 		returnJob.Status.Failed = 1
 		return returnJob, nil

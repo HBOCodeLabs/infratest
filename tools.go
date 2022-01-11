@@ -5,5 +5,5 @@ package tools
 
 import (
 	_ "github.com/golang/mock/mockgen"
-	_ "sigs.k8s.io/kind" 
+	_ "sigs.k8s.io/kind"
 )
