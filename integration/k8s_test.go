@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,6 +14,7 @@ import (
 	infrak8s "github.com/hbocodelabs/infratest/pkg/k8s"
 
 	//"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	batchv1 "k8s.io/api/batch/v1"
@@ -22,22 +24,57 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster"
 )
 
+func createKINDCluster(name string, version string, kubeconfigPath string) (err error) {
+	nodeImage := fmt.Sprintf("kindest/node:v%s", version)
+	provider := cluster.NewProvider()
+	err = provider.Create(
+		name, 
+		cluster.CreateWithNodeImage(nodeImage),
+		cluster.CreateWithKubeconfigPath(kubeconfigPath),
+	)
+	return
+}
+
+func deleteKINDCluster(name string, kubeconfigPath string) (err error) {
+	provider := cluster.NewProvider()
+	err = provider.Delete(name, kubeconfigPath)
+	return
+}
+
 func TestAssertJobSucceeds(t *testing.T) {
 	clusterName := strings.ToLower(random.UniqueId())
 	namespace := strings.ToLower(random.UniqueId())
-	jobName := strings.ToLower(random.UniqueId())
-	kubeConfigPath, err := k8s.GetKubeConfigPathE(t)
-	require.Nil(t, err)
+	kubeConfigPath := filepath.Join(os.TempDir(), clusterName)
 	k8sVersion := os.Getenv("K8S_VERSION")
 	if k8sVersion == "" {
 		k8sVersion = "1.21.1"
 	}
-	nodeImage := fmt.Sprintf("kindest/node:v%s", k8sVersion)
-
-	provider := cluster.NewProvider()
-	err = provider.Create(clusterName, cluster.CreateWithNodeImage(nodeImage))
+	err := createKINDCluster(clusterName, k8sVersion, kubeConfigPath)
 	require.Nil(t, err)
-	defer provider.Delete(clusterName, kubeConfigPath)
+	defer deleteKINDCluster(clusterName, kubeConfigPath)
+
+	testCases := []struct{
+		name string
+		image string
+		command []string
+		arguments []string
+		testResult bool
+	}{
+		{
+			name: "Job finishes successfully",
+			image: "ubuntu:20.04",
+			command: []string{"/bin/bash", "-c", "--"},
+			arguments: []string{"sleep 5; exit 0;"},
+			testResult: false,
+		},
+		{
+			name: "Job fails",
+			image: "ubuntu:20.04",
+			command: []string{"/bin/bash", "-c", "--"},
+			arguments: []string{"sleep 5; exit 1;"},
+			testResult: true,
+		},
+	}
 
 	kubectlOptions := &k8s.KubectlOptions{
 		ConfigPath: kubeConfigPath,
@@ -48,38 +85,44 @@ func TestAssertJobSucceeds(t *testing.T) {
 		err = k8s.DeleteNamespaceE(t, kubectlOptions, namespace)
 		require.Nil(t, err)
 	}()
-	jobClient, err := infrak8s.GetJobClient(kubeConfigPath, namespace)
+	jobClient, err := infrak8s.GetJobClientE(kubeConfigPath, namespace)
 	require.Nil(t, err)
-	jobSpec := &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      jobName,
-			Namespace: namespace,
-		},
-		Spec: batchv1.JobSpec{
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicyNever,
-					Containers: []corev1.Container{
-						corev1.Container{
-							Name:  jobName,
-							Image: "ubuntu:latest",
-							Command: []string{
-								"/bin/bash",
-								"-c",
-								"--",
-							},
-							Args: []string{
-								"sleep 5; exit 0;",
+
+	for _, testCase := range(testCases) {
+		jobName := strings.ToLower(random.UniqueId())
+		backoffLimit := int32(1)
+		jobSpec := &batchv1.Job{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      jobName,
+				Namespace: namespace,
+			},
+			Spec: batchv1.JobSpec{
+				BackoffLimit: &backoffLimit,
+				Template: corev1.PodTemplateSpec{
+					Spec: corev1.PodSpec{
+						RestartPolicy: corev1.RestartPolicyNever,
+						Containers: []corev1.Container{
+							corev1.Container{
+								Name:  jobName,
+								Image: testCase.image,
+								Command: testCase.command,
+								Args: testCase.arguments,
 							},
 						},
 					},
 				},
 			},
-		},
+		}
+		input := infrak8s.AssertJobSucceedsInput{
+			JobSpec: jobSpec,
+		}
+		ctx := context.Background()
+		fakeTest := &testing.T{}
+
+		t.Run(testCase.name, func(t *testing.T) {
+			infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, input)
+			assert.Equal(t, testCase.testResult, fakeTest.Failed())
+		})
+		
 	}
-	ctx := context.Background()
-
-	err = infrak8s.AssertJobSucceeds(t, ctx, jobClient, jobSpec)
-	require.Nil(t, err)
-
 }
