@@ -16,7 +16,7 @@ test-fmt:
 .PHONY: test-fmt
 
 test: vet test-fmt
-	go test -cover $(SOURCE) -count=1
+	go test -cover ./pkg/... -count=1
 .PHONY: test
 
 tools:
