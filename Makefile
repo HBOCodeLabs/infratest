@@ -5,6 +5,8 @@ SOURCE = ./...
 export SHELL:=/bin/bash
 export SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
 
+export K8S_VERSION:=1.21.1
+
 .ONESHELL:
 
 vet:
@@ -28,9 +30,9 @@ mock: tools
 	mockgen -source pkg/aws/dax.go -destination mock/dax.go -package mock
 	mockgen -source pkg/aws/ec2.go -destination mock/ec2.go -package mock
 	mockgen -source pkg/k8s/jobs.go -destination mock/k8s_jobs.go -package mock
-.PHONY: mock
-
+.PHONY: 
 
 .PHONY: integration-test
 integration-test:
+	echo K8S_VERSION: $(K8S_VERSION)
 	go test -v -timeout 10m -count 1 ./integration/...
