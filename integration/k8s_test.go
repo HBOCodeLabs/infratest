@@ -2,6 +2,8 @@ package integration_test
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -26,9 +28,14 @@ func TestAssertJobSucceeds(t *testing.T) {
 	jobName := strings.ToLower(random.UniqueId())
 	kubeConfigPath, err := k8s.GetKubeConfigPathE(t)
 	require.Nil(t, err)
+	k8sVersion := os.Getenv("K8S_VERSION")
+	if k8sVersion == "" {
+		k8sVersion = "1.21.1"
+	}
+	nodeImage := fmt.Sprintf("kindest/node:v%s", k8sVersion)
 
 	provider := cluster.NewProvider()
-	err = provider.Create(clusterName)
+	err = provider.Create(clusterName, cluster.CreateWithNodeImage(nodeImage))
 	require.Nil(t, err)
 	defer provider.Delete(clusterName, kubeConfigPath)
 

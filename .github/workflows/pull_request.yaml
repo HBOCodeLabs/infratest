@@ -33,5 +33,5 @@ jobs:
           go-version: 1.17
       - name: Check out source code
         uses: actions/checkout@v2
-      - name: Run integration tests
-        run: make integration-test K8S_VERSION=${{ matrix.k8s_version }}
+      - name: Run k8s integration tests
+        run: make k8s-integration-test K8S_VERSION=${{ matrix.k8s_version }}

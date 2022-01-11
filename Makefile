@@ -32,7 +32,7 @@ mock: tools
 	mockgen -source pkg/k8s/jobs.go -destination mock/k8s_jobs.go -package mock
 .PHONY: 
 
-.PHONY: integration-test
-integration-test:
+.PHONY: k8s-integration-test
+k8s-integration-test:
 	echo K8S_VERSION: $(K8S_VERSION)
-	go test -v -timeout 10m -count 1 ./integration/...
+	go test -v -timeout 10m -count 1 ./integration/k8s_test.go

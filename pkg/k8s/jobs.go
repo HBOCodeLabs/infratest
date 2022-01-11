@@ -67,7 +67,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 	require.Nil(t, err)
 
 	for job.Status.Active > 0 || job.Status.StartTime == nil {
-		t.Log("Job is still running")
+		t.Logf("Job is still running")
 		time.Sleep(5 * time.Second)
 		job, err = jobClient.Get(ctx, job.Name, getOpts)
 		require.Nil(t, err)
