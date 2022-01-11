@@ -21,7 +21,7 @@ type JobClient interface {
 // the method will use the path $HOME/.kube/config, where $HOME is the user's home
 // directory as determined by the OS.
 func GetJobClient(kubeconfigPath string, namespace string) (client JobClient, err error) {
-	clientset, err := getClient(kubeconfigPath)
+	clientset, err := getClientset(kubeconfigPath)
 	if err != nil {
 		return
 	}
