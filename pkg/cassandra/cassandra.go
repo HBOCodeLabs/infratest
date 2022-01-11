@@ -3,30 +3,48 @@
 package cassandra
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/HBOCodeLabs/hurley-kit/secrets"
+	"context"
+	"testing"
+	"github.com/gocql/gocql"
 )
 
-func GetVaultSecrets() {
-	ttl := secrets.CacheTTL(time.Duration(3600) * time.Second)
-	vaultAddress := secrets.VaultAddress("https://vault.api.hbo.com")
-	vaultTimeout := secrets.VaultTimeout(time.Duration(3600) * time.Second)
-	vaultMaxRetries := secrets.VaultMaxRetries(3)
-	appRole := secrets.AppRole("beta-demo")
+type goCqlClient interface {
+	cluster *gocql..ClusterConfig
+	session *gocql..Session
 
-	vaultStore, err := secrets.NewVaultStore(ttl, vaultAddress, vaultTimeout, vaultMaxRetries, appRole)
-	if err != nil {
-		t.Errorf("Failed to create secret store. Error %s", err)
-		t.Fail()
-	}
-	//	assertion = false
-	byts, err := vaultStore.Get("dre/service/all_rds/generic_read")
-	if err != nil {
-		return "false", err
+}
+
+type DBConnection struct {
+	cluster *gocql..ClusterConfig
+	session *gocql..Session
+}
+
+type ClusterConfigInput struct {
+	ip string
+	keyspace string
+}
+var connection DBConnection
+
+
+
+func SetupDBConnection(input ClusterConfigInput) {
+	connection.cluster - gocql.NewCluster(input.ip)
+	connection.cluster.Consistency = gocql.One
+	connection.cluster.keyspace = input.keyspace
+	connection.session,  _ = connection.cluster.CreateSession()
+
+
+}
+
+func AssertCassandraQuerySucceeds(ClusterConfigInput) {
+	assertion = false
+
+	query := "select key from system.local"
+	if err := connection.session.Query(query).Exec();
+
+	err != nil {
+		return err
 	}
 
-	fmt.Println("secret is", byts)
 
 }
