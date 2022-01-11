@@ -28,7 +28,7 @@ func createKINDCluster(name string, version string, kubeconfigPath string) (err 
 	nodeImage := fmt.Sprintf("kindest/node:v%s", version)
 	provider := cluster.NewProvider()
 	err = provider.Create(
-		name, 
+		name,
 		cluster.CreateWithNodeImage(nodeImage),
 		cluster.CreateWithKubeconfigPath(kubeconfigPath),
 	)
@@ -53,25 +53,25 @@ func TestAssertJobSucceeds(t *testing.T) {
 	require.Nil(t, err)
 	defer deleteKINDCluster(clusterName, kubeConfigPath)
 
-	testCases := []struct{
-		name string
-		image string
-		command []string
-		arguments []string
+	testCases := []struct {
+		name       string
+		image      string
+		command    []string
+		arguments  []string
 		testResult bool
 	}{
 		{
-			name: "Job finishes successfully",
-			image: "ubuntu:20.04",
-			command: []string{"/bin/bash", "-c", "--"},
-			arguments: []string{"sleep 5; exit 0;"},
+			name:       "Job finishes successfully",
+			image:      "ubuntu:20.04",
+			command:    []string{"/bin/bash", "-c", "--"},
+			arguments:  []string{"sleep 5; exit 0;"},
 			testResult: false,
 		},
 		{
-			name: "Job fails",
-			image: "ubuntu:20.04",
-			command: []string{"/bin/bash", "-c", "--"},
-			arguments: []string{"sleep 5; exit 1;"},
+			name:       "Job fails",
+			image:      "ubuntu:20.04",
+			command:    []string{"/bin/bash", "-c", "--"},
+			arguments:  []string{"sleep 5; exit 1;"},
 			testResult: true,
 		},
 	}
@@ -88,7 +88,7 @@ func TestAssertJobSucceeds(t *testing.T) {
 	jobClient, err := infrak8s.GetJobClientE(kubeConfigPath, namespace)
 	require.Nil(t, err)
 
-	for _, testCase := range(testCases) {
+	for _, testCase := range testCases {
 		jobName := strings.ToLower(random.UniqueId())
 		backoffLimit := int32(1)
 		jobSpec := &batchv1.Job{
@@ -103,10 +103,10 @@ func TestAssertJobSucceeds(t *testing.T) {
 						RestartPolicy: corev1.RestartPolicyNever,
 						Containers: []corev1.Container{
 							corev1.Container{
-								Name:  jobName,
-								Image: testCase.image,
+								Name:    jobName,
+								Image:   testCase.image,
 								Command: testCase.command,
-								Args: testCase.arguments,
+								Args:    testCase.arguments,
 							},
 						},
 					},
@@ -123,6 +123,6 @@ func TestAssertJobSucceeds(t *testing.T) {
 			infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, input)
 			assert.Equal(t, testCase.testResult, fakeTest.Failed())
 		})
-		
+
 	}
 }
