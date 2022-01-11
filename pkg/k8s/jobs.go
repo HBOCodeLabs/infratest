@@ -11,16 +11,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// JobClient is an interface that partially implements the [JobInterface object](https://pkg.go.dev/k8s.io/client-go@v0.23.1/kubernetes/typed/batch/v1#JobInterface).
 type JobClient interface {
 	Create(context.Context, *apiv1.Job, metav1.CreateOptions) (*apiv1.Job, error)
 	Get(context.Context, string, metav1.GetOptions) (*apiv1.Job, error)
 }
 
-// GetJobClient returns a JobClient object given a path to a kubeconfig file and
+// AssertJobSucceedsInput is a struct used as an input to the AssertJobSucceeds method.
+type AssertJobSucceedsInput struct {
+	// The job to run
+	JobSpec *apiv1.Job
+}
+
+// GetJobClientE returns a JobClient object given a path to a kubeconfig file and
 // a namespace name. If a blank string is passed as the kubeconfig path, then
 // the method will use the path $HOME/.kube/config, where $HOME is the user's home
 // directory as determined by the OS.
-func GetJobClient(kubeconfigPath string, namespace string) (client JobClient, err error) {
+func GetJobClientE(kubeconfigPath string, namespace string) (client JobClient, err error) {
 	clientset, err := getClientset(kubeconfigPath)
 	if err != nil {
 		return
@@ -60,10 +67,10 @@ job := &batchv1.Job{
 err := AssertJobSucceeds(t, ctx, client, job)
 ```
 */
-func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, job *apiv1.Job) (err error) {
+func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, input AssertJobSucceedsInput) {
 	createOpts := metav1.CreateOptions{}
 	getOpts := metav1.GetOptions{}
-	job, err = jobClient.Create(ctx, job, createOpts)
+	job, err := jobClient.Create(ctx, input.JobSpec, createOpts)
 	require.Nil(t, err)
 
 	for job.Status.Active > 0 || job.Status.StartTime == nil {
@@ -75,5 +82,4 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 	if job.Status.Failed > 0 {
 		t.Fail()
 	}
-	return
 }

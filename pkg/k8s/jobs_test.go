@@ -42,6 +42,9 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 			},
 		},
 	}
+	input := AssertJobSucceedsInput{
+		JobSpec: job,
+	}
 	fakeTest := &testing.T{}
 
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
@@ -52,9 +55,8 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 		return returnJob, nil
 	})
 
-	err := AssertJobSucceeds(fakeTest, context.TODO(), jobClient, job)
+	AssertJobSucceeds(fakeTest, context.TODO(), jobClient, input)
 
-	assert.Nil(t, err)
 	assert.False(t, fakeTest.Failed())
 }
 
@@ -87,6 +89,9 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 			},
 		},
 	}
+	input := AssertJobSucceedsInput{
+		JobSpec: job,
+	}
 	fakeTest := &testing.T{}
 
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
@@ -97,8 +102,7 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 		return returnJob, nil
 	})
 
-	err := AssertJobSucceeds(fakeTest, context.TODO(), jobClient, job)
+	AssertJobSucceeds(fakeTest, context.TODO(), jobClient, input)
 
-	assert.Nil(t, err)
 	assert.True(t, fakeTest.Failed())
 }
