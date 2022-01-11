@@ -3,6 +3,7 @@ package k8s
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hbocodelabs/infratest/mock"
@@ -13,6 +14,7 @@ import (
 )
 
 func TestAssertJobSucceeds_Succeeds(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	jobClient := mock.NewMockJobClient(ctrl)
 	createOpts := metav1.CreateOptions{}
@@ -45,6 +47,7 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
 	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error) {
 		returnJob := job.DeepCopy()
+		returnJob.Status.StartTime = &metav1.Time{Time: time.Now()}
 		returnJob.Status.Succeeded = 1
 		return returnJob, nil
 	})
@@ -56,6 +59,7 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 }
 
 func TestAssertJobSucceeds_Fails(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	jobClient := mock.NewMockJobClient(ctrl)
 	createOpts := metav1.CreateOptions{}
@@ -88,6 +92,7 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
 	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error) {
 		returnJob := job.DeepCopy()
+		returnJob.Status.StartTime = &metav1.Time{Time: time.Now()}
 		returnJob.Status.Failed = 1
 		return returnJob, nil
 	})
