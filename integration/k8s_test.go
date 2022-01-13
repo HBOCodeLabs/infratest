@@ -88,41 +88,44 @@ func TestAssertJobSucceeds(t *testing.T) {
 	jobClient, err := infrak8s.GetJobClientE(kubeConfigPath, namespace)
 	require.Nil(t, err)
 
-	for _, testCase := range testCases {
-		jobName := strings.ToLower(random.UniqueId())
-		backoffLimit := int32(1)
-		jobSpec := &batchv1.Job{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      jobName,
-				Namespace: namespace,
-			},
-			Spec: batchv1.JobSpec{
-				BackoffLimit: &backoffLimit,
-				Template: corev1.PodTemplateSpec{
-					Spec: corev1.PodSpec{
-						RestartPolicy: corev1.RestartPolicyNever,
-						Containers: []corev1.Container{
-							corev1.Container{
-								Name:    jobName,
-								Image:   testCase.image,
-								Command: testCase.command,
-								Args:    testCase.arguments,
+	t.Run("TestCases", func(t *testing.T) {
+		for _, testCase := range testCases {
+			t.Run(testCase.name, func(t *testing.T) {
+				t.Parallel()
+
+				jobName := strings.ToLower(random.UniqueId())
+				backoffLimit := int32(1)
+				jobSpec := &batchv1.Job{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      jobName,
+						Namespace: namespace,
+					},
+					Spec: batchv1.JobSpec{
+						BackoffLimit: &backoffLimit,
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								RestartPolicy: corev1.RestartPolicyNever,
+								Containers: []corev1.Container{
+									corev1.Container{
+										Name:    jobName,
+										Image:   testCase.image,
+										Command: testCase.command,
+										Args:    testCase.arguments,
+									},
+								},
 							},
 						},
 					},
-				},
-			},
-		}
-		input := infrak8s.AssertJobSucceedsInput{
-			JobSpec: jobSpec,
-		}
-		ctx := context.Background()
-		fakeTest := &testing.T{}
+				}
+				input := infrak8s.AssertJobSucceedsInput{
+					JobSpec: jobSpec,
+				}
+				ctx := context.Background()
+				fakeTest := &testing.T{}
+				infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, input)
+				assert.Equal(t, testCase.testResult, fakeTest.Failed())
+			})
 
-		t.Run(testCase.name, func(t *testing.T) {
-			infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, input)
-			assert.Equal(t, testCase.testResult, fakeTest.Failed())
-		})
-
-	}
+		}
+	})
 }
