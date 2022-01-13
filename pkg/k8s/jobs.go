@@ -75,7 +75,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, i
 	getOpts := metav1.GetOptions{}
 	job, err := jobClient.Create(ctx, input.JobSpec, createOpts)
 	require.Nil(t, err)
-	
+
 	for IsJobCompleted(job) == false {
 		t.Logf("Job is still running")
 		time.Sleep(5 * time.Second)
@@ -88,7 +88,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, i
 }
 
 func IsJobCompleted(job *apiv1.Job) (isCompleted bool) {
-	for _, condition := range(job.Status.Conditions) {
+	for _, condition := range job.Status.Conditions {
 		if (condition.Type == apiv1.JobComplete || condition.Type == apiv1.JobFailed) && condition.Status == v1.ConditionTrue {
 			isCompleted = true
 		}
