@@ -30,7 +30,7 @@ mock: tools
 	mockgen -source pkg/aws/dax.go -destination mock/dax.go -package mock
 	mockgen -source pkg/aws/ec2.go -destination mock/ec2.go -package mock
 	mockgen -source pkg/k8s/jobs.go -destination mock/k8s_jobs.go -package mock
-.PHONY: 
+.PHONY: mock
 
 .PHONY: k8s-integration-test
 k8s-integration-test:
