@@ -5,9 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gruntwork-io/terratest/modules/k8s"
+
 	"github.com/stretchr/testify/require"
 
 	apiv1 "k8s.io/api/batch/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -72,14 +75,23 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, i
 	getOpts := metav1.GetOptions{}
 	job, err := jobClient.Create(ctx, input.JobSpec, createOpts)
 	require.Nil(t, err)
-
-	for job.Status.Active > 0 || job.Status.StartTime == nil {
+	
+	for IsJobCompleted(job) == false {
 		t.Logf("Job is still running")
 		time.Sleep(5 * time.Second)
 		job, err = jobClient.Get(ctx, job.Name, getOpts)
 		require.Nil(t, err)
 	}
-	if job.Status.Failed > 0 {
+	if k8s.IsJobSucceeded(job) == false {
 		t.Fail()
 	}
+}
+
+func IsJobCompleted(job *apiv1.Job) (isCompleted bool) {
+	for _, condition := range(job.Status.Conditions) {
+		if (condition.Type == apiv1.JobComplete || condition.Type == apiv1.JobFailed) && condition.Status == v1.ConditionTrue {
+			isCompleted = true
+		}
+	}
+	return
 }
