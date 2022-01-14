@@ -3,7 +3,6 @@ package k8s
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hbocodelabs/infratest/mock"
@@ -50,8 +49,11 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
 	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error) {
 		returnJob := job.DeepCopy()
-		returnJob.Status.StartTime = &metav1.Time{Time: time.Now()}
-		returnJob.Status.Succeeded = 1
+		completedCondition := batchv1.JobCondition{
+			Type:   batchv1.JobComplete,
+			Status: corev1.ConditionTrue,
+		}
+		returnJob.Status.Conditions = append(returnJob.Status.Conditions, completedCondition)
 		return returnJob, nil
 	})
 
@@ -97,8 +99,11 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 	jobClient.EXPECT().Create(ctx, job, createOpts).Return(job, nil)
 	jobClient.EXPECT().Get(ctx, jobName, getOpts).DoAndReturn(func(context.Context, string, metav1.GetOptions) (*batchv1.Job, error) {
 		returnJob := job.DeepCopy()
-		returnJob.Status.StartTime = &metav1.Time{Time: time.Now()}
-		returnJob.Status.Failed = 1
+		completedCondition := batchv1.JobCondition{
+			Type:   batchv1.JobFailed,
+			Status: corev1.ConditionTrue,
+		}
+		returnJob.Status.Conditions = append(returnJob.Status.Conditions, completedCondition)
 		return returnJob, nil
 	})
 
