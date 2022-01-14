@@ -4,47 +4,75 @@ package cassandra
 
 import (
 	"context"
+	"log"
 	"testing"
+
 	"github.com/gocql/gocql"
 )
 
-type goCqlClient interface {
-	cluster *gocql..ClusterConfig
-	session *gocql..Session
-
+type SessionInterface interface {
+	//Query(stmt string, values ...interface{}) *Query
+	Query(stmt string, values ...interface{}) QueryInterface
 }
 
-type DBConnection struct {
-	cluster *gocql..ClusterConfig
-	session *gocql..Session
+type QueryInterface interface {
+	Bind(...interface{}) QueryInterface
+	Exec() error
 }
 
-type ClusterConfigInput struct {
-	ip string
-	keyspace string
-}
-var connection DBConnection
-
-
-
-func SetupDBConnection(input ClusterConfigInput) {
-	connection.cluster - gocql.NewCluster(input.ip)
-	connection.cluster.Consistency = gocql.One
-	connection.cluster.keyspace = input.keyspace
-	connection.session,  _ = connection.cluster.CreateSession()
-
-
+type Session struct {
+	session *gocql.Session
 }
 
-func AssertCassandraQuerySucceeds(ClusterConfigInput) {
+type GetSessionInput struct {
+	InstanceIp string
+	Keyspace   string
+	Username   string
+	Password   string
+}
+
+type AssertCassandraQueryInput struct {
+	//Query string
+	Query *gocql.Query
+}
+
+func NewSession(session *gocql.Session) SessionInterface {
+	return &Session{
+		session,
+	}
+}
+
+func GetSession(t *testing.T, ctx context.Context, input GetSessionInput) (cassandra.SessionInterface, err error) {
+	cluster := gocql.NewCluster(input.InstanceIp)
+	cluster.Consistency = gocql.One
+	cluster.Keyspace = input.Keyspace
+	cluster.Authenticator = gocql.PasswordAuthenticator{
+		Username: input.Username,
+		Password: input.Password,
+	}
+	session, err := cluster.CreateSession()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return cassandra.NewSession(session), err
+}
+
+func AssertCassandraQuerySucceedsE(t *testing.T, ctx context.Context, session Session, queryinput AssertCassandraQueryInput) (assertion bool, err error) {
 	assertion = false
 
-	query := "select key from system.local"
-	if err := connection.session.Query(query).Exec();
+	connectionStatus = false
+	result, err := session.Query(queryinput.Query).Exec()
+	if err != nil {
+		return assertion, err
+	}
+	connectionStatus - true
 
-	err != nil {
-		return err
+	queryStatus := false
+	if result != nil {
+		queryStatus = true
 	}
 
+	assertion = queryStatus && connectionStatus
+	return
 
 }
