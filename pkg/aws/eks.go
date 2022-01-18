@@ -28,7 +28,7 @@ type GetEKSTokenOutput struct {
 	CAData   []byte
 }
 
-func GetEKSAuthE(t *testing.T, ctx context.Context, client EKSClient, input *GetEKSTokenInput) (output *GetEKSTokenOutput, err error) {
+func GetEKSClusterE(t *testing.T, ctx context.Context, client EKSClient, input *GetEKSTokenInput) (output *GetEKSTokenOutput, err error) {
 	describeClusterInput := &eks.DescribeClusterInput{
 		Name: &input.ClusterName,
 	}

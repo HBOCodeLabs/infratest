@@ -17,7 +17,7 @@ import (
 	"sigs.k8s.io/aws-iam-authenticator/pkg/token"
 )
 
-func TestGetEKSAuthE(t *testing.T) {
+func TestGetEKSClusterE(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	client := mock.NewMockEKSClient(ctrl)
 	clusterName := "my-cluster"
@@ -43,7 +43,7 @@ func TestGetEKSAuthE(t *testing.T) {
 	client.EXPECT().DescribeCluster(ctx, describeClusterInput).Times(1).Return(describeClusterOutput, nil)
 	fakeTest := &testing.T{}
 
-	output, err := GetEKSAuthE(fakeTest, ctx, client, input)
+	output, err := GetEKSClusterE(fakeTest, ctx, client, input)
 
 	require.Nil(t, err)
 	require.NotNil(t, output)

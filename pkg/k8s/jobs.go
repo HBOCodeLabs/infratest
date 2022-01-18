@@ -48,6 +48,8 @@ Example:
 ```
 // Gets a client for the default Kubeconfig path and the 'default' namespace
 client := GetJobClient("", "default")
+// Or, get a clientset for an EKS cluster
+client := aws.
 ctx := context.Background()
 jobName := "job"
 job := &batchv1.Job{
