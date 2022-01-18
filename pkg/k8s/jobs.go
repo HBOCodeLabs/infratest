@@ -76,13 +76,13 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, i
 	job, err := jobClient.Create(ctx, input.JobSpec, createOpts)
 	require.Nil(t, err)
 
-	for IsJobCompleted(job) == false {
+	for !IsJobCompleted(job) {
 		t.Logf("Job is still running")
 		time.Sleep(5 * time.Second)
 		job, err = jobClient.Get(ctx, job.Name, getOpts)
 		require.Nil(t, err)
 	}
-	if k8s.IsJobSucceeded(job) == false {
+	if !k8s.IsJobSucceeded(job) {
 		t.Fail()
 	}
 }
