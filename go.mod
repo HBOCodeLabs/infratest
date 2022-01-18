@@ -7,6 +7,7 @@ go 1.17
 require (
 	github.com/aws/aws-sdk-go-v2/service/dax v1.6.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.12.0
+	github.com/aws/aws-sdk-go-v2/service/eks v1.18.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.11.0
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.12.0
 	github.com/golang/mock v1.6.0
@@ -16,6 +17,7 @@ require (
 	k8s.io/api v0.23.1
 	k8s.io/apimachinery v0.23.1
 	k8s.io/client-go v0.23.1
+	sigs.k8s.io/aws-iam-authenticator v0.5.3
 	sigs.k8s.io/kind v0.11.1
 )
 
@@ -24,11 +26,11 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/aws/aws-sdk-go v1.40.56 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.11.0 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.0 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.0.0 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.13.0 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.4 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.2.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.2.1 // indirect
-	github.com/aws/smithy-go v1.9.0 // indirect
+	github.com/aws/smithy-go v1.10.0 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -36,6 +38,7 @@ require (
 	github.com/go-errors/errors v1.0.2-0.20180813162953-d98b870cc4e0 // indirect
 	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
+	github.com/gofrs/flock v0.7.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
@@ -60,6 +63,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pquerna/otp v1.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/cobra v1.2.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/urfave/cli v1.22.2 // indirect
