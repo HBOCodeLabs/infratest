@@ -69,21 +69,20 @@ type GetEKSClientsetInput struct {
 	ClusterName string
 	// The API endpoint of the cluster.
 	ClusterEndpoint string
-	// The method used to get the authorization token for EKS. Generally you should pass the
-	// GetWithOptions method from the [Generator interface](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3/pkg/token#Generator).
-	// See the GetEKSGeneratorE method.
-	GetWithOptions func(*token.GetTokenOptions) (*token.Token, error)
-	// The method used to create the clientset object. Generally you should pass the
-	// kubernetes.NewForConfig method from the Kubernetes [client-go](https://pkg.go.dev/k8s.io/client-go/kubernetes#NewForConfig) package.
-	NewForConfig func(*rest.Config) (*kubernetes.Clientset, error)
 	// The (not base64 encoded) string data for the CA certificate used by the cluster.
 	ClusterCAData []byte
+}
+
+type GetEKSClientsetOptions struct {
+	Generator    Generator
+	NewForConfig func(*rest.Config) (*kubernetes.Clientset, error)
+	Input        GetEKSClientsetInput
 }
 
 // Generator is an interface used for mocking the [Generator interface](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3/pkg/token#Generator)
 // from the `aws-iam-authenticator/token` package.
 type Generator interface {
-	GetWithOptions(*token.GetTokenOptions) (*token.Token, error)
+	GetWithOptions(*token.GetTokenOptions) (token.Token, error)
 }
 
 // Kubernetes is an interface used for mocking the Kubernetes client-go package.
@@ -97,16 +96,32 @@ type Kubernetes interface {
    the [`aws-iam-authenticator` guidelines](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3#readme-specifying-credentials-using-aws-profiles).
 	 It is meant to be used in tandem with the GetEKSClusterE method; see the documentation for that method for an example.
 */
-func GetEKSClientsetE(ctx context.Context, input *GetEKSClientsetInput) (clientset *kubernetes.Clientset, err error) {
-	opts := &token.GetTokenOptions{
+func GetEKSClientsetE(ctx context.Context, input *GetEKSClientsetInput, opts ...func(*GetEKSClientsetOptions) error) (clientset *kubernetes.Clientset, err error) {
+	getTokenOpts := &token.GetTokenOptions{
 		ClusterID: input.ClusterName,
 	}
-	token, err := input.GetWithOptions(opts)
+	generator, err := token.NewGenerator(true, false)
+	if err != nil {
+		return
+	}
+	getEKSClientsetOptions := &GetEKSClientsetOptions{
+		Generator:    generator,
+		NewForConfig: kubernetes.NewForConfig,
+	}
+
+	for _, fn := range opts {
+		err = fn(getEKSClientsetOptions)
+		if err != nil {
+			return
+		}
+	}
+
+	token, err := getEKSClientsetOptions.Generator.GetWithOptions(getTokenOpts)
 	if err != nil {
 		return
 	}
 
-	clientset, err = input.NewForConfig(&rest.Config{
+	clientset, err = getEKSClientsetOptions.NewForConfig(&rest.Config{
 		Host:        input.ClusterEndpoint,
 		BearerToken: token.Token,
 		TLSClientConfig: rest.TLSClientConfig{

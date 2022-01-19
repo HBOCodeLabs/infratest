@@ -59,7 +59,7 @@ func TestGetEKSClientset(t *testing.T) {
 	clusterCAData := "cadata"
 	clusterCADataBytes := []byte(clusterCAData)
 	tokenData := "token"
-	tokenObj := &token.Token{
+	tokenObj := token.Token{
 		Token: tokenData,
 	}
 	getTokenOpts := &token.GetTokenOptions{
@@ -80,13 +80,17 @@ func TestGetEKSClientset(t *testing.T) {
 		ClusterName:     clusterName,
 		ClusterEndpoint: clusterEndpoint,
 		ClusterCAData:   clusterCADataBytes,
-		GetWithOptions:  mockGenerator.GetWithOptions,
-		NewForConfig:    mockKubernetes.NewForConfig,
 	}
 	mockGenerator.EXPECT().GetWithOptions(getTokenOpts).Times(1).Return(tokenObj, nil)
 	mockKubernetes.EXPECT().NewForConfig(restConfig).Times(1).Return(clientset, nil)
+	var optFn func(*GetEKSClientsetOptions) error
+	optFn = func(geo *GetEKSClientsetOptions) error {
+		geo.Generator = mockGenerator
+		geo.NewForConfig = mockKubernetes.NewForConfig
+		return nil
+	}
 
-	actualClientSet, err := GetEKSClientsetE(ctx, getEKSClientEInput)
+	actualClientSet, err := GetEKSClientsetE(ctx, getEKSClientEInput, optFn)
 
 	require.Nil(t, err)
 	require.NotNil(t, actualClientSet)

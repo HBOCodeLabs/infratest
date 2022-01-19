@@ -82,10 +82,10 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 }
 
 // GetWithOptions mocks base method.
-func (m *MockGenerator) GetWithOptions(arg0 *token.GetTokenOptions) (*token.Token, error) {
+func (m *MockGenerator) GetWithOptions(arg0 *token.GetTokenOptions) (token.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWithOptions", arg0)
-	ret0, _ := ret[0].(*token.Token)
+	ret0, _ := ret[0].(token.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
