@@ -46,6 +46,7 @@ type GetEKSClusterOutput struct {
 			NewForConfig: kubernetes.NewForConfig,
 		}
 		clientset, err := GetEKSClientsetE(ctx, getClientsetInput)
+		```
 */
 func GetEKSClusterE(ctx context.Context, client EKSClient, input *GetEKSClusterInput) (output *GetEKSClusterOutput, err error) {
 	describeClusterInput := &eks.DescribeClusterInput{
