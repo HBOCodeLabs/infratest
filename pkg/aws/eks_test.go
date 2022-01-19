@@ -37,7 +37,7 @@ func TestGetEKSClusterE(t *testing.T) {
 			},
 		},
 	}
-	input := &GetEKSTokenInput{
+	input := &GetEKSClusterInput{
 		ClusterName: clusterName,
 	}
 	client.EXPECT().DescribeCluster(ctx, describeClusterInput).Times(1).Return(describeClusterOutput, nil)
@@ -81,7 +81,7 @@ func TestGetEKSClientset(t *testing.T) {
 		ClusterEndpoint: clusterEndpoint,
 		ClusterCAData:   clusterCADataBytes,
 		GetWithOptions:  mockGenerator.GetWithOptions,
-		NewConfigFunc:   mockKubernetes.NewForConfig,
+		NewForConfig:    mockKubernetes.NewForConfig,
 	}
 	mockGenerator.EXPECT().GetWithOptions(getTokenOpts).Times(1).Return(tokenObj, nil)
 	mockKubernetes.EXPECT().NewForConfig(restConfig).Times(1).Return(clientset, nil)
