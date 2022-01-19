@@ -73,8 +73,6 @@ func TestGetEKSClientset(t *testing.T) {
 		},
 	}
 	clientset := &kubernetes.Clientset{}
-	//clientset, err := kubernetes.NewForConfig(restConfig)
-	//require.Nil(t, err)
 	ctx := context.Background()
 	getEKSClientEInput := &GetEKSClientsetInput{
 		ClusterName:     clusterName,
@@ -83,8 +81,7 @@ func TestGetEKSClientset(t *testing.T) {
 	}
 	mockGenerator.EXPECT().GetWithOptions(getTokenOpts).Times(1).Return(tokenObj, nil)
 	mockKubernetes.EXPECT().NewForConfig(restConfig).Times(1).Return(clientset, nil)
-	var optFn func(*GetEKSClientsetOptions) error
-	optFn = func(geo *GetEKSClientsetOptions) error {
+	optFn := func(geo *GetEKSClientsetOptions) error {
 		geo.Generator = mockGenerator
 		geo.NewForConfig = mockKubernetes.NewForConfig
 		return nil

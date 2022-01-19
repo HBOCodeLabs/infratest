@@ -73,10 +73,16 @@ type GetEKSClientsetInput struct {
 	ClusterCAData []byte
 }
 
+// GetEKSClientsetOptions is used for passing functional options to the GetEKSClientset method.
 type GetEKSClientsetOptions struct {
-	Generator    Generator
+	// The object used for generating the token. Generally this should only be specified in the context of tests.
+	Generator Generator
+	// The method used to get the clientset object. Generally this should only be specified in the context of tests.
 	NewForConfig func(*rest.Config) (*kubernetes.Clientset, error)
-	Input        GetEKSClientsetInput
+	// The input object passed to the GetWithOptions method.
+	GetTokenOptions *token.GetTokenOptions
+	// The input object passed to the NewForConfig method when generating the clientset.
+	RESTConfig *rest.Config
 }
 
 // Generator is an interface used for mocking the [Generator interface](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3/pkg/token#Generator)
@@ -121,13 +127,23 @@ func GetEKSClientsetE(ctx context.Context, input *GetEKSClientsetInput, opts ...
 		return
 	}
 
-	clientset, err = getEKSClientsetOptions.NewForConfig(&rest.Config{
+	restConfig := &rest.Config{
 		Host:        input.ClusterEndpoint,
 		BearerToken: token.Token,
 		TLSClientConfig: rest.TLSClientConfig{
 			CAData: input.ClusterCAData,
 		},
-	})
+	}
+	// I'm calling this again since it potentially may alter the Config object.
+	// There is probably a better way to do this.
+	for _, fn := range opts {
+		err = fn(getEKSClientsetOptions)
+		if err != nil {
+			return
+		}
+	}
+
+	clientset, err = getEKSClientsetOptions.NewForConfig(restConfig)
 	return
 }
 
