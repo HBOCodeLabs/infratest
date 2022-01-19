@@ -41,9 +41,8 @@ func TestGetEKSClusterE(t *testing.T) {
 		ClusterName: clusterName,
 	}
 	client.EXPECT().DescribeCluster(ctx, describeClusterInput).Times(1).Return(describeClusterOutput, nil)
-	fakeTest := &testing.T{}
 
-	output, err := GetEKSClusterE(fakeTest, ctx, client, input)
+	output, err := GetEKSClusterE(ctx, client, input)
 
 	require.Nil(t, err)
 	require.NotNil(t, output)
@@ -76,7 +75,6 @@ func TestGetEKSClientset(t *testing.T) {
 	clientset := &kubernetes.Clientset{}
 	//clientset, err := kubernetes.NewForConfig(restConfig)
 	//require.Nil(t, err)
-	fakeTest := &testing.T{}
 	ctx := context.Background()
 	getEKSClientEInput := &GetEKSClientsetInput{
 		ClusterName:     clusterName,
@@ -88,7 +86,7 @@ func TestGetEKSClientset(t *testing.T) {
 	mockGenerator.EXPECT().GetWithOptions(getTokenOpts).Times(1).Return(tokenObj, nil)
 	mockKubernetes.EXPECT().NewForConfig(restConfig).Times(1).Return(clientset, nil)
 
-	actualClientSet, err := GetEKSClientsetE(fakeTest, ctx, getEKSClientEInput)
+	actualClientSet, err := GetEKSClientsetE(ctx, getEKSClientEInput)
 
 	require.Nil(t, err)
 	require.NotNil(t, actualClientSet)
