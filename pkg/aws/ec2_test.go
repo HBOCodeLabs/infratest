@@ -489,20 +489,34 @@ func TestAssertEC2TagValue_NoMatch(t *testing.T) {
 			},
 		},
 	}
-	clientMock := &EC2ClientMock{
-		DescribeTagsOutput: describeTagsOutput,
-		Test:               t,
-	}
-	describeTagsInput := AssertEC2TagValueInput{
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	assertEC2TagValueInput := AssertEC2TagValueInput{
 		TagName:    tagName,
 		Value:      tagValue,
 		InstanceID: instanceID,
 	}
+	resourceTypeFilterName := FILTER_NAME_RESOURCETYPE
+	resourceTypeFilterValue := FILTER_VALUE_INSTANCE
+	resourceIDFilterName := FILTER_NAME_RESOURCEID
+	describeTagsInput := &ec2.DescribeTagsInput{
+		Filters: []types.Filter{
+			{
+				Name:   &resourceTypeFilterName,
+				Values: []string{resourceTypeFilterValue},
+			},
+			{
+				Name:   &resourceIDFilterName,
+				Values: []string{instanceID},
+			},
+		},
+	}
 	ctx := context.Background()
 	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeTags(ctx, describeTagsInput).Times(1).Return(describeTagsOutput, nil)
 
 	// Test
-	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
+	AssertEC2TagValue(fakeTest, ctx, clientMock, assertEC2TagValueInput)
 	assert.True(t, fakeTest.Failed(), "AssertEC2TagValue did not fail the test when the tag value did not match.")
 }
 
@@ -596,20 +610,34 @@ func TestAssertEC2TagValue_Match(t *testing.T) {
 			},
 		},
 	}
-	clientMock := &EC2ClientMock{
-		DescribeTagsOutput: describeTagsOutput,
-		Test:               t,
-	}
-	describeTagsInput := AssertEC2TagValueInput{
+	assertEC2TagValueInput := AssertEC2TagValueInput{
 		TagName:    tagName,
 		Value:      tagValue,
 		InstanceID: instanceID,
 	}
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	resourceTypeFilterName := FILTER_NAME_RESOURCETYPE
+	resourceTypeFilterValue := FILTER_VALUE_INSTANCE
+	resourceIDFilterName := FILTER_NAME_RESOURCEID
+	describeTagsInput := &ec2.DescribeTagsInput{
+		Filters: []types.Filter{
+			{
+				Name:   &resourceTypeFilterName,
+				Values: []string{resourceTypeFilterValue},
+			},
+			{
+				Name:   &resourceIDFilterName,
+				Values: []string{instanceID},
+			},
+		},
+	}
 	ctx := context.Background()
 	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeTags(ctx, describeTagsInput).Times(1).Return(describeTagsOutput, nil)
 
 	// Test
-	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
+	AssertEC2TagValue(fakeTest, ctx, clientMock, assertEC2TagValueInput)
 	assert.False(t, fakeTest.Failed(), "AssertEC2TagValue failed the test when tag value matched.")
 }
 

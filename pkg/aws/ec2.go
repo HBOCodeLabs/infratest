@@ -12,6 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const FILTER_NAME_RESOURCEID string = "resource-id"
+const FILTER_NAME_RESOURCETYPE string = "resource-type"
+const FILTER_VALUE_INSTANCE string = "instance"
+
 type EC2Client interface {
 	DescribeInstances(context.Context, *ec2.DescribeInstancesInput, ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 
@@ -48,7 +52,7 @@ type AssertEC2TagValueInput struct {
 	TagName string
 	// The value of the tag to assert.
 	Value string
-	// The Instance ID that the tag mustbe set on.
+	// The Instance ID that the tag must be set on.
 	InstanceID string
 }
 
@@ -115,13 +119,18 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 
 // AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
 func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2TagValueInput) {
-	resourceTypeFilterName := "resource-type"
-	resourceTypeFilterValue := "instance"
+	resourceTypeFilterName := FILTER_NAME_RESOURCETYPE
+	resourceTypeFilterValue := FILTER_VALUE_INSTANCE
+	resourceIDFilterName := FILTER_NAME_RESOURCEID
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
 				Name:   &resourceTypeFilterName,
 				Values: []string{resourceTypeFilterValue},
+			},
+			{
+				Name:   &resourceIDFilterName,
+				Values: []string{input.InstanceID},
 			},
 		},
 	}
