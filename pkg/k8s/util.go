@@ -15,7 +15,7 @@ type GetClientsetOptionsE struct {
 	// The method used to get the clientset object. Generally this should only be specified in the context of tests.
 	NewForConfig func(*rest.Config) (*k8s.Clientset, error)
 	// The input object passed to the NewForConfig method when generating the clientset.
-	RESTConfig *rest.Config
+	RESTConfig rest.Config
 }
 
 // Kubernetes is an interface used for mocking the Kubernetes client-go package.
@@ -81,7 +81,7 @@ func WithGetClientsetEKubeconfigPath(path string) (f GetClientsetEOptionsFunc) {
 		if err != nil {
 			return err
 		}
-		gco.RESTConfig = config
+		gco.RESTConfig = *config
 		return nil
 	}
 	return
@@ -90,7 +90,7 @@ func WithGetClientsetEKubeconfigPath(path string) (f GetClientsetEOptionsFunc) {
 /* GetClientsetE returns a Kuberenets client-go Clientset object with a friendly interface.
  */
 func GetClientsetE(ctx context.Context, opts ...GetClientsetEOptionsFunc) (clientset *k8s.Clientset, err error) {
-	restConfig := &rest.Config{}
+	restConfig := rest.Config{}
 	getClientsetEOptions := &GetClientsetOptionsE{
 		NewForConfig: k8s.NewForConfig,
 		RESTConfig:   restConfig,
@@ -103,6 +103,6 @@ func GetClientsetE(ctx context.Context, opts ...GetClientsetEOptionsFunc) (clien
 		}
 	}
 
-	clientset, err = getClientsetEOptions.NewForConfig(restConfig)
+	clientset, err = getClientsetEOptions.NewForConfig(&getClientsetEOptions.RESTConfig)
 	return
 }

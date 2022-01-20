@@ -80,7 +80,7 @@ func TestGetEKSClientset_WithTokenHost(t *testing.T) {
 func TestWithGetClientsetHost(t *testing.T) {
 	t.Parallel()
 	expectedHostName := "host"
-	restConfig := &rest.Config{}
+	restConfig := rest.Config{}
 	getClientsetEOptions := &GetClientsetOptionsE{
 		RESTConfig: restConfig,
 	}
@@ -88,14 +88,14 @@ func TestWithGetClientsetHost(t *testing.T) {
 	f := WithGetClientsetEHost(expectedHostName)
 	f(getClientsetEOptions)
 
-	assert.Equal(t, expectedHostName, restConfig.Host)
+	assert.Equal(t, expectedHostName, getClientsetEOptions.RESTConfig.Host)
 
 }
 
 func TestWithClientsetToken(t *testing.T) {
 	t.Parallel()
 	expectedTokenData := "token"
-	restConfig := &rest.Config{}
+	restConfig := rest.Config{}
 	getClientsetEOptions := &GetClientsetOptionsE{
 		RESTConfig: restConfig,
 	}
@@ -103,14 +103,14 @@ func TestWithClientsetToken(t *testing.T) {
 	f := WithGetClientsetEToken(expectedTokenData)
 	f(getClientsetEOptions)
 
-	assert.Equal(t, expectedTokenData, restConfig.BearerToken)
+	assert.Equal(t, expectedTokenData, getClientsetEOptions.RESTConfig.BearerToken)
 }
 
 func TestWithClientsetCA(t *testing.T) {
 	t.Parallel()
 	expectedCAData := "CA"
 	expectedCADataBytes := []byte(expectedCAData)
-	restConfig := &rest.Config{}
+	restConfig := rest.Config{}
 	getClientsetEOptions := &GetClientsetOptionsE{
 		RESTConfig: restConfig,
 	}
@@ -118,5 +118,5 @@ func TestWithClientsetCA(t *testing.T) {
 	f := WithGetClientsetETLSCAData(expectedCADataBytes)
 	f(getClientsetEOptions)
 
-	assert.Equal(t, expectedCADataBytes, restConfig.TLSClientConfig.CAData)
+	assert.Equal(t, expectedCADataBytes, getClientsetEOptions.RESTConfig.TLSClientConfig.CAData)
 }
