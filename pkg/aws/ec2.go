@@ -148,36 +148,6 @@ func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, inpu
 	assert.True(t, hasMatch, "Tag with key '%s' does not exist.", input.TagName)
 }
 
-// AssertEC2TagValueE asserts that an EC2 instance has a given tag with the given value.
-// This func is deprecated in favor of the AssertEC2TagValue function.
-func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2TagValueEInput) (assertion bool, err error) {
-	resourceTypeFilterName := "resource-type"
-	resourceTypeFilterValue := "instance"
-	describeTagsInput := &ec2.DescribeTagsInput{
-		Filters: []types.Filter{
-			{
-				Name:   &resourceTypeFilterName,
-				Values: []string{resourceTypeFilterValue},
-			},
-		},
-	}
-	describeTagsOutput, err := client.DescribeTags(ctx, describeTagsInput)
-	if err != nil {
-		return false, err
-	}
-	hasTagMatch := false
-	for _, tag := range describeTagsOutput.Tags {
-		tagKey := tag.Key
-		tagValue := tag.Value
-		if *tagKey == input.TagName {
-			if *tagValue == input.Value {
-				hasTagMatch = true
-			}
-		}
-	}
-	return hasTagMatch, nil
-}
-
 func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, InstanceID string) (types.Instance, error) {
 	describeInstancesInput := &ec2.DescribeInstancesInput{
 		InstanceIds: []string{InstanceID},
