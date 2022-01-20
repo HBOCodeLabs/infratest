@@ -11,9 +11,6 @@ import (
 	"github.com/hbocodelabs/infratest/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-
 	"sigs.k8s.io/aws-iam-authenticator/pkg/token"
 )
 
@@ -50,14 +47,18 @@ func TestGetEKSClusterE(t *testing.T) {
 	assert.Equal(t, clusterCADataBytes, output.CAData)
 }
 
-func TestGetEKSClientset(t *testing.T) {
+func withGetEKSTokenEMock(mock generator) (f GetEKSTokenEOptionsFunc) {
+	f = func(gee *GetEKSTokenEOptions) error {
+		gee.Generator = mock
+		return nil
+	}
+	return
+}
+
+func TestGetEKSToken(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockGenerator := mock.NewMockgenerator(ctrl)
-	mockKubernetes := mock.NewMockKubernetes(ctrl)
 	clusterName := "my-cluster"
-	clusterEndpoint := "my-cluster.eks.amazonaws.com"
-	clusterCAData := "cadata"
-	clusterCADataBytes := []byte(clusterCAData)
 	tokenData := "token"
 	tokenObj := token.Token{
 		Token: tokenData,
@@ -65,31 +66,12 @@ func TestGetEKSClientset(t *testing.T) {
 	getTokenOpts := &token.GetTokenOptions{
 		ClusterID: clusterName,
 	}
-	restConfig := &rest.Config{
-		Host:        clusterEndpoint,
-		BearerToken: tokenData,
-		TLSClientConfig: rest.TLSClientConfig{
-			CAData: clusterCADataBytes,
-		},
-	}
-	clientset := &kubernetes.Clientset{}
 	ctx := context.Background()
-	getEKSClientEInput := &GetEKSClientsetInput{
-		ClusterName:     clusterName,
-		ClusterEndpoint: clusterEndpoint,
-		ClusterCAData:   clusterCADataBytes,
-	}
 	mockGenerator.EXPECT().GetWithOptions(getTokenOpts).Times(1).Return(tokenObj, nil)
-	mockKubernetes.EXPECT().NewForConfig(restConfig).Times(1).Return(clientset, nil)
-	optFn := func(geo *GetEKSClientsetOptions) error {
-		geo.Generator = mockGenerator
-		geo.NewForConfig = mockKubernetes.NewForConfig
-		return nil
-	}
 
-	actualClientSet, err := GetEKSClientsetE(ctx, getEKSClientEInput, optFn)
+	actualToken, err := GetEKSTokenE(ctx, clusterName, withGetEKSTokenEMock(mockGenerator))
 
 	require.Nil(t, err)
-	require.NotNil(t, actualClientSet)
-	assert.Equal(t, clientset, actualClientSet)
+	require.NotNil(t, actualToken)
+	assert.Equal(t, tokenData, actualToken.Token)
 }

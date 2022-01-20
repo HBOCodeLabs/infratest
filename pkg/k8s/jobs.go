@@ -31,7 +31,8 @@ type AssertJobSucceedsInput struct {
 // the method will use the path $HOME/.kube/config, where $HOME is the user's home
 // directory as determined by the OS.
 func GetJobClientE(kubeconfigPath string, namespace string) (client JobClient, err error) {
-	clientset, err := getClientset(kubeconfigPath)
+	ctx := context.Background()
+	clientset, err := GetClientsetE(ctx, WithGetClientsetEKubeconfigPath(kubeconfigPath))
 	if err != nil {
 		return
 	}

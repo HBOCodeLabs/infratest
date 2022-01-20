@@ -10,8 +10,6 @@ import (
 
 	eks "github.com/aws/aws-sdk-go-v2/service/eks"
 	gomock "github.com/golang/mock/gomock"
-	kubernetes "k8s.io/client-go/kubernetes"
-	rest "k8s.io/client-go/rest"
 	token "sigs.k8s.io/aws-iam-authenticator/pkg/token"
 )
 
@@ -94,42 +92,4 @@ func (m *Mockgenerator) GetWithOptions(arg0 *token.GetTokenOptions) (token.Token
 func (mr *MockgeneratorMockRecorder) GetWithOptions(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithOptions", reflect.TypeOf((*Mockgenerator)(nil).GetWithOptions), arg0)
-}
-
-// MockKubernetes is a mock of Kubernetes interface.
-type MockKubernetes struct {
-	ctrl     *gomock.Controller
-	recorder *MockKubernetesMockRecorder
-}
-
-// MockKubernetesMockRecorder is the mock recorder for MockKubernetes.
-type MockKubernetesMockRecorder struct {
-	mock *MockKubernetes
-}
-
-// NewMockKubernetes creates a new mock instance.
-func NewMockKubernetes(ctrl *gomock.Controller) *MockKubernetes {
-	mock := &MockKubernetes{ctrl: ctrl}
-	mock.recorder = &MockKubernetesMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockKubernetes) EXPECT() *MockKubernetesMockRecorder {
-	return m.recorder
-}
-
-// NewForConfig mocks base method.
-func (m *MockKubernetes) NewForConfig(arg0 *rest.Config) (*kubernetes.Clientset, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewForConfig", arg0)
-	ret0, _ := ret[0].(*kubernetes.Clientset)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// NewForConfig indicates an expected call of NewForConfig.
-func (mr *MockKubernetesMockRecorder) NewForConfig(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewForConfig", reflect.TypeOf((*MockKubernetes)(nil).NewForConfig), arg0)
 }
