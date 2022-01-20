@@ -52,7 +52,7 @@ func TestGetEKSClusterE(t *testing.T) {
 
 func TestGetEKSClientset(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockGenerator := mock.NewMockGenerator(ctrl)
+	mockGenerator := mock.NewMockgenerator(ctrl)
 	mockKubernetes := mock.NewMockKubernetes(ctrl)
 	clusterName := "my-cluster"
 	clusterEndpoint := "my-cluster.eks.amazonaws.com"

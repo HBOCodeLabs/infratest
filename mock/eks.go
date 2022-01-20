@@ -58,31 +58,31 @@ func (mr *MockEKSClientMockRecorder) DescribeCluster(arg0, arg1 interface{}, arg
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeCluster", reflect.TypeOf((*MockEKSClient)(nil).DescribeCluster), varargs...)
 }
 
-// MockGenerator is a mock of Generator interface.
-type MockGenerator struct {
+// Mockgenerator is a mock of generator interface.
+type Mockgenerator struct {
 	ctrl     *gomock.Controller
-	recorder *MockGeneratorMockRecorder
+	recorder *MockgeneratorMockRecorder
 }
 
-// MockGeneratorMockRecorder is the mock recorder for MockGenerator.
-type MockGeneratorMockRecorder struct {
-	mock *MockGenerator
+// MockgeneratorMockRecorder is the mock recorder for Mockgenerator.
+type MockgeneratorMockRecorder struct {
+	mock *Mockgenerator
 }
 
-// NewMockGenerator creates a new mock instance.
-func NewMockGenerator(ctrl *gomock.Controller) *MockGenerator {
-	mock := &MockGenerator{ctrl: ctrl}
-	mock.recorder = &MockGeneratorMockRecorder{mock}
+// NewMockgenerator creates a new mock instance.
+func NewMockgenerator(ctrl *gomock.Controller) *Mockgenerator {
+	mock := &Mockgenerator{ctrl: ctrl}
+	mock.recorder = &MockgeneratorMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
+func (m *Mockgenerator) EXPECT() *MockgeneratorMockRecorder {
 	return m.recorder
 }
 
 // GetWithOptions mocks base method.
-func (m *MockGenerator) GetWithOptions(arg0 *token.GetTokenOptions) (token.Token, error) {
+func (m *Mockgenerator) GetWithOptions(arg0 *token.GetTokenOptions) (token.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWithOptions", arg0)
 	ret0, _ := ret[0].(token.Token)
@@ -91,9 +91,9 @@ func (m *MockGenerator) GetWithOptions(arg0 *token.GetTokenOptions) (token.Token
 }
 
 // GetWithOptions indicates an expected call of GetWithOptions.
-func (mr *MockGeneratorMockRecorder) GetWithOptions(arg0 interface{}) *gomock.Call {
+func (mr *MockgeneratorMockRecorder) GetWithOptions(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithOptions", reflect.TypeOf((*MockGenerator)(nil).GetWithOptions), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithOptions", reflect.TypeOf((*Mockgenerator)(nil).GetWithOptions), arg0)
 }
 
 // MockKubernetes is a mock of Kubernetes interface.

@@ -76,7 +76,7 @@ type GetEKSClientsetInput struct {
 // GetEKSClientsetOptions is used for passing functional options to the GetEKSClientset method.
 type GetEKSClientsetOptions struct {
 	// The object used for generating the token. Generally this should only be specified in the context of tests.
-	Generator Generator
+	Generator generator
 	// The method used to get the clientset object. Generally this should only be specified in the context of tests.
 	NewForConfig func(*rest.Config) (*kubernetes.Clientset, error)
 	// The input object passed to the GetWithOptions method.
@@ -85,9 +85,9 @@ type GetEKSClientsetOptions struct {
 	RESTConfig *rest.Config
 }
 
-// Generator is an interface used for mocking the [Generator interface](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3/pkg/token#Generator)
+// generator is an interface used for mocking the [generator interface](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3/pkg/token#generator)
 // from the `aws-iam-authenticator/token` package.
-type Generator interface {
+type generator interface {
 	GetWithOptions(*token.GetTokenOptions) (token.Token, error)
 }
 
@@ -97,10 +97,7 @@ type Kubernetes interface {
 }
 
 /* GetEKSClientsetE returns a Kuberenets client-go Clientset object that is set up for connectivity to
-   a specified EKS cluster name. It is meant to be used in tandem with the GetEKSClusterE method.
-	 It assumes you have AWS credentials configured in your environment in accordance with
-   the [`aws-iam-authenticator` guidelines](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3#readme-specifying-credentials-using-aws-profiles).
-	 It is meant to be used in tandem with the GetEKSClusterE method; see the documentation for that method for an example.
+   a specified EKS cluster name.
 */
 func GetEKSClientsetE(ctx context.Context, input *GetEKSClientsetInput, opts ...func(*GetEKSClientsetOptions) error) (clientset *kubernetes.Clientset, err error) {
 	getTokenOpts := &token.GetTokenOptions{
@@ -147,7 +144,37 @@ func GetEKSClientsetE(ctx context.Context, input *GetEKSClientsetInput, opts ...
 	return
 }
 
-func GetEKSGeneratorE() (generator token.Generator, err error) {
-	generator, err = token.NewGenerator(true, false)
+type GetEKSTokenEOptions struct {
+	// The object used for generating the token. Generally this should only be specified in the context of tests.
+	Generator generator
+	// The input object passed to the GetWithOptions method.
+	GetTokenOptions *token.GetTokenOptions
+}
+
+// GetEKSTokenE generates a new bearer token for authenticating with EKS clusters.
+// It assumes you have AWS credentials configured in your environment in accordance with
+// the [`aws-iam-authenticator` guidelines](https://pkg.go.dev/sigs.k8s.io/aws-iam-authenticator@v0.5.3#readme-specifying-credentials-using-aws-profiles).
+// You can alter that configuring by passing in functional options that modify the GetTokenOptions object.
+func GetEKSTokenE(clusterName string, opts ...func(*GetEKSTokenEOptions) error) (tkn token.Token, err error) {
+	getTokenOpts := &token.GetTokenOptions{
+		ClusterID: clusterName,
+	}
+	generator, err := token.NewGenerator(true, false)
+	if err != nil {
+		return
+	}
+	getEKSTokenEOptions := &GetEKSTokenEOptions{
+		Generator:       generator,
+		GetTokenOptions: getTokenOpts,
+	}
+
+	for _, fn := range opts {
+		err = fn(getEKSTokenEOptions)
+		if err != nil {
+			return
+		}
+	}
+
+	tkn, err = getEKSTokenEOptions.Generator.GetWithOptions(getTokenOpts)
 	return
 }
