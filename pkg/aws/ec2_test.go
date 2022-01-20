@@ -496,9 +496,9 @@ func TestAssertEC2TagValue_NoMatch(t *testing.T) {
 		Value:      tagValue,
 		InstanceID: instanceID,
 	}
-	resourceTypeFilterName := FILTER_NAME_RESOURCETYPE
-	resourceTypeFilterValue := FILTER_VALUE_INSTANCE
-	resourceIDFilterName := FILTER_NAME_RESOURCEID
+	resourceTypeFilterName := resourceTypeFilterName
+	resourceTypeFilterValue := resourceTypeFilterValueInstance
+	resourceIDFilterName := resourceIDFilterName
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
@@ -544,9 +544,9 @@ func TestAssertEC2TagValue_Match(t *testing.T) {
 	}
 	ctrl := gomock.NewController(t)
 	clientMock := mock.NewMockEC2Client(ctrl)
-	resourceTypeFilterName := FILTER_NAME_RESOURCETYPE
-	resourceTypeFilterValue := FILTER_VALUE_INSTANCE
-	resourceIDFilterName := FILTER_NAME_RESOURCEID
+	resourceTypeFilterName := resourceTypeFilterName
+	resourceTypeFilterValue := resourceTypeFilterValueInstance
+	resourceIDFilterName := resourceIDFilterName
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
