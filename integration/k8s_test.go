@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
 
 	infrak8s "github.com/hbocodelabs/infratest/pkg/k8s"
 
-	//"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -49,30 +49,45 @@ func TestAssertJobSucceeds(t *testing.T) {
 	if k8sVersion == "" {
 		k8sVersion = "1.21.1"
 	}
+	t.Log("Creating KIND cluster")
 	err := createKINDCluster(clusterName, k8sVersion, kubeConfigPath)
 	require.Nil(t, err)
-	defer deleteKINDCluster(clusterName, kubeConfigPath)
+	defer func() {
+		t.Log("Deleting KIND cluster")
+		deleteKINDCluster(clusterName, kubeConfigPath)
+	}()
 
 	testCases := []struct {
 		name       string
 		image      string
 		command    []string
 		arguments  []string
-		testResult bool
+		timeoutPeriod time.Duration
+		testFailExpected bool
 	}{
 		{
-			name:       "Job finishes successfully",
+			name:       "Job succeeds",
 			image:      "ubuntu:20.04",
 			command:    []string{"/bin/bash", "-c", "--"},
 			arguments:  []string{"sleep 5; exit 0;"},
-			testResult: false,
+			timeoutPeriod: 5 * time.Minute,
+			testFailExpected: false,
 		},
 		{
 			name:       "Job fails",
 			image:      "ubuntu:20.04",
 			command:    []string{"/bin/bash", "-c", "--"},
 			arguments:  []string{"sleep 5; exit 1;"},
-			testResult: true,
+			timeoutPeriod: 5 * time.Minute,
+			testFailExpected: true,
+		},
+		{
+			name:       "Context timeout expired",
+			image:      "ubuntu:20.04",
+			command:    []string{"/bin/bash", "-c", "--"},
+			arguments:  []string{"sleep 60; exit 1;"},
+			timeoutPeriod: 30 * time.Second,
+			testFailExpected: true,
 		},
 	}
 
@@ -85,11 +100,17 @@ func TestAssertJobSucceeds(t *testing.T) {
 		err = k8s.DeleteNamespaceE(t, kubectlOptions, namespace)
 		require.Nil(t, err)
 	}()
-	jobClient, err := infrak8s.GetJobClientE(kubeConfigPath, namespace)
+	ctx := context.Background()
+	clientset, err := infrak8s.GetClientsetE(ctx, infrak8s.WithGetClientsetEKubeconfigPath(kubeConfigPath))
+	require.Nil(t, err)
+	jobClient := clientset.BatchV1().Jobs(namespace)
 	require.Nil(t, err)
 
 	t.Run("TestCases", func(t *testing.T) {
 		for _, testCase := range testCases {
+			// Yes, this is necessary (and works!). See the example at https://go.dev/blog/subtests.
+			testCase := testCase
+
 			t.Run(testCase.name, func(t *testing.T) {
 				t.Parallel()
 
@@ -120,10 +141,11 @@ func TestAssertJobSucceeds(t *testing.T) {
 				input := infrak8s.AssertJobSucceedsInput{
 					JobSpec: jobSpec,
 				}
-				ctx := context.Background()
+				ctx, cancelFunc := context.WithTimeout(context.Background(), testCase.timeoutPeriod)
+				defer cancelFunc()
 				fakeTest := &testing.T{}
 				infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, input)
-				assert.Equal(t, testCase.testResult, fakeTest.Failed())
+				assert.Equal(t, testCase.testFailExpected, fakeTest.Failed())
 			})
 
 		}
