@@ -45,7 +45,7 @@ func withGetClientsetMock(mock kubernetes) (f GetClientsetEOptionsFunc) {
 	return
 }
 
-func TestGetEKSClientset_WithTokenHost(t *testing.T) {
+func TestGetClientsetE_WithTokenHost(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	mockKubernetes := mock.NewMockkubernetes(ctrl)
