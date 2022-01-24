@@ -12,6 +12,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	resourceIDFilterName            string = "resource-id"
+	resourceTypeFilterName          string = "resource-type"
+	resourceTypeFilterValueInstance string = "instance"
+)
+
 type EC2Client interface {
 	DescribeInstances(context.Context, *ec2.DescribeInstancesInput, ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 
@@ -48,7 +54,7 @@ type AssertEC2TagValueInput struct {
 	TagName string
 	// The value of the tag to assert.
 	Value string
-	// The Instance ID that the tag mustbe set on.
+	// The Instance ID that the method will assert has a tag with the specified tag name and the specified value.
 	InstanceID string
 }
 
@@ -115,13 +121,18 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 
 // AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
 func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2TagValueInput) {
-	resourceTypeFilterName := "resource-type"
-	resourceTypeFilterValue := "instance"
+	resourceTypeFilterName := resourceTypeFilterName
+	resourceTypeFilterValue := resourceTypeFilterValueInstance
+	resourceIDFilterName := resourceIDFilterName
 	describeTagsInput := &ec2.DescribeTagsInput{
 		Filters: []types.Filter{
 			{
 				Name:   &resourceTypeFilterName,
 				Values: []string{resourceTypeFilterValue},
+			},
+			{
+				Name:   &resourceIDFilterName,
+				Values: []string{input.InstanceID},
 			},
 		},
 	}
@@ -137,36 +148,6 @@ func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, inpu
 		}
 	}
 	assert.True(t, hasMatch, "Tag with key '%s' does not exist.", input.TagName)
-}
-
-// AssertEC2TagValueE asserts that an EC2 instance has a given tag with the given value.
-// This func is deprecated in favor of the AssertEC2TagValue function.
-func AssertEC2TagValueE(ctx context.Context, client EC2Client, input AssertEC2TagValueEInput) (assertion bool, err error) {
-	resourceTypeFilterName := "resource-type"
-	resourceTypeFilterValue := "instance"
-	describeTagsInput := &ec2.DescribeTagsInput{
-		Filters: []types.Filter{
-			{
-				Name:   &resourceTypeFilterName,
-				Values: []string{resourceTypeFilterValue},
-			},
-		},
-	}
-	describeTagsOutput, err := client.DescribeTags(ctx, describeTagsInput)
-	if err != nil {
-		return false, err
-	}
-	hasTagMatch := false
-	for _, tag := range describeTagsOutput.Tags {
-		tagKey := tag.Key
-		tagValue := tag.Value
-		if *tagKey == input.TagName {
-			if *tagValue == input.Value {
-				hasTagMatch = true
-			}
-		}
-	}
-	return hasTagMatch, nil
 }
 
 func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, InstanceID string) (types.Instance, error) {
