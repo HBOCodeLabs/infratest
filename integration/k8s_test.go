@@ -58,35 +58,35 @@ func TestAssertJobSucceeds(t *testing.T) {
 	}()
 
 	testCases := []struct {
-		name       string
-		image      string
-		command    []string
-		arguments  []string
-		timeoutPeriod time.Duration
+		name             string
+		image            string
+		command          []string
+		arguments        []string
+		timeoutPeriod    time.Duration
 		testFailExpected bool
 	}{
 		{
-			name:       "Job succeeds",
-			image:      "ubuntu:20.04",
-			command:    []string{"/bin/bash", "-c", "--"},
-			arguments:  []string{"sleep 5; exit 0;"},
-			timeoutPeriod: 5 * time.Minute,
+			name:             "Job succeeds",
+			image:            "ubuntu:20.04",
+			command:          []string{"/bin/bash", "-c", "--"},
+			arguments:        []string{"sleep 5; exit 0;"},
+			timeoutPeriod:    5 * time.Minute,
 			testFailExpected: false,
 		},
 		{
-			name:       "Job fails",
-			image:      "ubuntu:20.04",
-			command:    []string{"/bin/bash", "-c", "--"},
-			arguments:  []string{"sleep 5; exit 1;"},
-			timeoutPeriod: 5 * time.Minute,
+			name:             "Job fails",
+			image:            "ubuntu:20.04",
+			command:          []string{"/bin/bash", "-c", "--"},
+			arguments:        []string{"sleep 5; exit 1;"},
+			timeoutPeriod:    5 * time.Minute,
 			testFailExpected: true,
 		},
 		{
-			name:       "Context timeout expired",
-			image:      "ubuntu:20.04",
-			command:    []string{"/bin/bash", "-c", "--"},
-			arguments:  []string{"sleep 60; exit 1;"},
-			timeoutPeriod: 30 * time.Second,
+			name:             "Context timeout expired",
+			image:            "ubuntu:20.04",
+			command:          []string{"/bin/bash", "-c", "--"},
+			arguments:        []string{"sleep 60; exit 1;"},
+			timeoutPeriod:    30 * time.Second,
 			testFailExpected: true,
 		},
 	}
@@ -138,13 +138,11 @@ func TestAssertJobSucceeds(t *testing.T) {
 						},
 					},
 				}
-				input := infrak8s.AssertJobSucceedsInput{
-					JobSpec: jobSpec,
-				}
+
 				ctx, cancelFunc := context.WithTimeout(context.Background(), testCase.timeoutPeriod)
 				defer cancelFunc()
 				fakeTest := &testing.T{}
-				infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, input)
+				infrak8s.AssertJobSucceeds(fakeTest, ctx, jobClient, jobSpec)
 				assert.Equal(t, testCase.testFailExpected, fakeTest.Failed())
 			})
 

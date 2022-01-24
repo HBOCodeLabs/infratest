@@ -18,21 +18,41 @@ type JobClient interface {
 	Get(context.Context, string, metav1.GetOptions) (*apiv1.Job, error)
 }
 
-// AssertJobSucceedsInput is a struct used as an input to the AssertJobSucceeds method.
-type AssertJobSucceedsInput struct {
-	// The job to run
-	JobSpec *apiv1.Job
+// AssertJobSucceedsOptions is a struct used for functional options for the AssertJobSucceeds method.
+type AssertJobSucceedsOptions struct {
+	// The job to run.
+	JobSpec apiv1.Job
+	// The CreateOptions used when creating the job.
+	CreateOptions metav1.CreateOptions
+	// The GetOptions used when retrieving the job for subsequent checks.
+	GetOptions metav1.GetOptions
 }
+
+type AssertJobSucceedsOptsFunc func(AssertJobSucceedsOptions) error
 
 /*
 AssertJobSucceeds will start a Kubernetes Job using the provided client and spec, then after it completes will either
 fail the passed test (if the job fails) or pass the test if the job succeeds. It should be passed a
 JobClient object and a Job object.
 */
-func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, input AssertJobSucceedsInput) {
+func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, jobSpec *apiv1.Job, optFns ...AssertJobSucceedsOptsFunc) {
 	createOpts := metav1.CreateOptions{}
 	getOpts := metav1.GetOptions{}
-	job, err := jobClient.Create(ctx, input.JobSpec, createOpts)
+	opts := AssertJobSucceedsOptions{
+		JobSpec:       *jobSpec,
+		CreateOptions: createOpts,
+		GetOptions:    getOpts,
+	}
+
+	for _, f := range optFns {
+		err := f(opts)
+		if err != nil {
+			t.Log(err)
+			return
+		}
+	}
+
+	job, err := jobClient.Create(ctx, jobSpec, createOpts)
 	if err != nil {
 		t.Error(err)
 		return
@@ -45,7 +65,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, i
 		if err != nil {
 			t.Error(err)
 			return
-		}	
+		}
 	}
 	if !k8s.IsJobSucceeded(job) {
 		t.Fail()
