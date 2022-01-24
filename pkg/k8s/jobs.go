@@ -59,7 +59,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 	}
 
 	for !IsJobCompleted(job) {
-		t.Logf("Job is still running")
+		t.Logf("Job %s is still running", job.Name)
 		time.Sleep(5 * time.Second)
 		job, err = jobClient.Get(ctx, job.Name, getOpts)
 		if err != nil {
