@@ -89,14 +89,14 @@ func WithGetClientsetEKubeconfigPath(path string) (f GetClientsetEOptionsFunc) {
 
 /* GetClientsetE returns a Kuberenets client-go Clientset object with a friendly interface.
  */
-func GetClientsetE(ctx context.Context, opts ...GetClientsetEOptionsFunc) (clientset *k8s.Clientset, err error) {
+func GetClientsetE(ctx context.Context, optFns ...GetClientsetEOptionsFunc) (clientset *k8s.Clientset, err error) {
 	restConfig := rest.Config{}
 	getClientsetEOptions := &GetClientsetOptionsE{
 		NewForConfig: k8s.NewForConfig,
 		RESTConfig:   restConfig,
 	}
 
-	for _, fn := range opts {
+	for _, fn := range optFns {
 		err = fn(getClientsetEOptions)
 		if err != nil {
 			return
