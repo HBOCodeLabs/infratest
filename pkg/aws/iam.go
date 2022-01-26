@@ -190,3 +190,17 @@ func unMarshallPolicyDocument(document string) (*PolicyDocument, error) {
 	}
 	return &policyDocument, nil
 }
+
+func getIAMRole(context context.Context, client *iam.Client, roleName string) (IAMRoleOutput, error) {
+	//IAMRoleOutput = []string
+	getIamRoleInput := &iam.GetRoleInput{
+		RoleName: &roleName,
+	}
+
+	IAMRoleOutput, err := client.GetRole(context, getIamRoleInput)
+	if err != nil {
+		return IAMRoleOutput, err
+	}
+
+	return IAMRoleOutput, err
+}
