@@ -37,7 +37,7 @@ func (m *MockEKSClient) EXPECT() *MockEKSClientMockRecorder {
 }
 
 // DescribeCluster mocks base method.
-func (m *MockEKSClient) DescribeCluster(arg0 context.Context, arg1 *eks.DescribeClusterInput, arg2 ...*eks.Options) (*eks.DescribeClusterOutput, error) {
+func (m *MockEKSClient) DescribeCluster(arg0 context.Context, arg1 *eks.DescribeClusterInput, arg2 ...func(*eks.Options)) (*eks.DescribeClusterOutput, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {

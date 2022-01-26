@@ -34,12 +34,9 @@ func TestGetEKSClusterE(t *testing.T) {
 			},
 		},
 	}
-	input := &GetEKSClusterInput{
-		ClusterName: clusterName,
-	}
 	client.EXPECT().DescribeCluster(ctx, describeClusterInput).Times(1).Return(describeClusterOutput, nil)
 
-	output, err := GetEKSClusterE(ctx, client, input)
+	output, err := GetEKSClusterE(ctx, client, clusterName)
 
 	require.Nil(t, err)
 	require.NotNil(t, output)

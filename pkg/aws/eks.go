@@ -10,15 +10,19 @@ import (
 )
 
 type EKSClient interface {
-	DescribeCluster(context.Context, *eks.DescribeClusterInput, ...*eks.Options) (*eks.DescribeClusterOutput, error)
+	DescribeCluster(context.Context, *eks.DescribeClusterInput, ...func(*eks.Options)) (*eks.DescribeClusterOutput, error)
 }
 
-type GetEKSClusterInput struct {
-	ClusterName string
+// GetEKSClusterEOptions is a struct for use with functional options for the GetEKSClusterE method.
+type GetEKSClusterEOptions struct {
+	// Options that are passed to the underlying DescribeCluster method.
+	EKSOptions []func(eks.Options)
 }
+
+// GetEKSClusterEOptionsFunc is a type used for functional options for the GetEKSClusterE method.
+type GetEKSClusterEOptionsFunc func(GetEKSClusterEOptions) error
 
 type GetEKSClusterOutput struct {
-	Token    string
 	Endpoint string
 	CAData   []byte
 }
@@ -45,10 +49,21 @@ type GetEKSClusterOutput struct {
 		clientset, err := GetEKSClientsetE(ctx, getClientsetInput)
 		```
 */
-func GetEKSClusterE(ctx context.Context, client EKSClient, input *GetEKSClusterInput) (output *GetEKSClusterOutput, err error) {
+func GetEKSClusterE(ctx context.Context, client EKSClient, clusterName string, optFns ...GetEKSClusterEOptionsFunc) (output *GetEKSClusterOutput, err error) {
 	describeClusterInput := &eks.DescribeClusterInput{
-		Name: &input.ClusterName,
+		Name: &clusterName,
 	}
+	opts := GetEKSClusterEOptions{
+		EKSOptions: []func(eks.Options){},
+	}
+
+	for _, f := range optFns {
+		err := f(opts)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	describeOutput, err := client.DescribeCluster(ctx, describeClusterInput)
 	if err != nil {
 		return
