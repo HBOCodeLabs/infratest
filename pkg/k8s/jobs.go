@@ -47,7 +47,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 	for _, f := range optFns {
 		err := f(opts)
 		if err != nil {
-			t.Log(err)
+			t.Error(err)
 			return
 		}
 	}
@@ -68,8 +68,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 		}
 	}
 	if !k8s.IsJobSucceeded(job) {
-		t.Logf("Job with name '%s' did not complete successfully.", job.Name)
-		t.Fail()
+		t.Errorf("Job with name '%s' did not complete successfully.", job.Name)
 	}
 }
 
