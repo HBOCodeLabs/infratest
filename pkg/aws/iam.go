@@ -13,6 +13,10 @@ import (
 	"testing"
 )
 
+type IAMClient interface {
+	GetRole(context.Context, *iam.GetRoleInput, ...func(*iam.Options)) (*iam.GetRoleOutput, error)
+}
+
 type PolicyDocument struct {
 	Version   string
 	Statement []StatementEntry
@@ -191,8 +195,8 @@ func unMarshallPolicyDocument(document string) (*PolicyDocument, error) {
 	return &policyDocument, nil
 }
 
-func getIAMRole(context context.Context, client *iam.Client, roleName string) (IAMRoleOutput, error) {
-	//IAMRoleOutput = []string
+func getIAMRole(context context.Context, client IAMClient, roleName string) (output *iam.GetRoleOutput, err error) {
+
 	getIamRoleInput := &iam.GetRoleInput{
 		RoleName: &roleName,
 	}
