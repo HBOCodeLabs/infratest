@@ -219,3 +219,7 @@ func TestUnMarshallPolicyDocument_DecodeJson(t *testing.T) {
 	}
 	assert.Equal(t, policyDocument, *policyDocumentResult)
 }
+
+func TestGetRole_Success(t *testing.T) {
+
+}
