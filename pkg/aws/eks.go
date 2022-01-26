@@ -16,7 +16,7 @@ type EKSClient interface {
 // GetEKSClusterEOptions is a struct for use with functional options for the GetEKSClusterE method.
 type GetEKSClusterEOptions struct {
 	// Options that are passed to the underlying DescribeCluster method.
-	EKSOptions []func(eks.Options)
+	EKSOptions []func(*eks.Options)
 }
 
 // GetEKSClusterEOptionsFunc is a type used for functional options for the GetEKSClusterE method.
@@ -28,14 +28,14 @@ type GetEKSClusterOutput struct {
 }
 
 /*	GetEKSClusterE returns some metadata about the specified EKS cluster, such as the endpoint and the CA certificate information.
-		It must be passed an AWS SDK v2 [EKS client object](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/eks#Client).
+	It must be passed an AWS SDK v2 [EKS client object](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/eks#Client).
 */
 func GetEKSClusterE(ctx context.Context, client EKSClient, clusterName string, optFns ...GetEKSClusterEOptionsFunc) (output *GetEKSClusterOutput, err error) {
 	describeClusterInput := &eks.DescribeClusterInput{
 		Name: &clusterName,
 	}
 	opts := GetEKSClusterEOptions{
-		EKSOptions: []func(eks.Options){},
+		EKSOptions: []func(*eks.Options){},
 	}
 
 	for _, f := range optFns {
@@ -45,7 +45,7 @@ func GetEKSClusterE(ctx context.Context, client EKSClient, clusterName string, o
 		}
 	}
 
-	describeOutput, err := client.DescribeCluster(ctx, describeClusterInput)
+	describeOutput, err := client.DescribeCluster(ctx, describeClusterInput, opts.EKSOptions...)
 	if err != nil {
 		return
 	}
@@ -95,6 +95,6 @@ func GetEKSTokenE(ctx context.Context, clusterName string, opts ...func(*GetEKST
 		}
 	}
 
-	tkn, err = getEKSTokenEOptions.Generator.GetWithOptions(getTokenOpts)
+	tkn, err = getEKSTokenEOptions.Generator.GetWithOptions(getEKSTokenEOptions.GetTokenOptions)
 	return
 }
