@@ -52,7 +52,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 		}
 	}
 
-	job, err := jobClient.Create(ctx, jobSpec, createOpts)
+	job, err := jobClient.Create(ctx, &opts.JobSpec, opts.CreateOptions)
 	if err != nil {
 		t.Error(err)
 		return
@@ -61,7 +61,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 	for !isJobCompleted(job) {
 		t.Logf("Job %s is still running", job.Name)
 		time.Sleep(5 * time.Second)
-		job, err = jobClient.Get(ctx, job.Name, getOpts)
+		job, err = jobClient.Get(ctx, job.Name, opts.GetOptions)
 		if err != nil {
 			t.Error(err)
 			return
