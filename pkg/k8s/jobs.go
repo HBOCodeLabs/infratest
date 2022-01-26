@@ -58,7 +58,7 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 		return
 	}
 
-	for !IsJobCompleted(job) {
+	for !isJobCompleted(job) {
 		t.Logf("Job %s is still running", job.Name)
 		time.Sleep(5 * time.Second)
 		job, err = jobClient.Get(ctx, job.Name, getOpts)
@@ -68,11 +68,13 @@ func AssertJobSucceeds(t *testing.T, ctx context.Context, jobClient JobClient, j
 		}
 	}
 	if !k8s.IsJobSucceeded(job) {
+		t.Logf("Job with name '%s' did not complete successfully.", job.Name)
 		t.Fail()
 	}
 }
 
-func IsJobCompleted(job *apiv1.Job) (isCompleted bool) {
+// isJobCompleted returns a boolean value indicating if a job has completed (whether successfully or not).
+func isJobCompleted(job *apiv1.Job) (isCompleted bool) {
 	for _, condition := range job.Status.Conditions {
 		if (condition.Type == apiv1.JobComplete || condition.Type == apiv1.JobFailed) && condition.Status == v1.ConditionTrue {
 			isCompleted = true
