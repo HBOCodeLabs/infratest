@@ -208,7 +208,3 @@ func getIAMRole(context context.Context, client IAMClient, roleName string) (out
 
 	return IAMRoleOutput, err
 }
-
-func AssertIAMRole() {
-
-}
