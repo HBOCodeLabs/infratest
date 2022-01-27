@@ -220,6 +220,40 @@ func TestUnMarshallPolicyDocument_DecodeJson(t *testing.T) {
 	assert.Equal(t, policyDocument, *policyDocumentResult)
 }
 
-func TestGetRole_Success(t *testing.T) {
+func TestAssertIamRoleComponent_MaxDuration(t *testing.T) {
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockIAMClient(ctrl)
+
+	roleMaxDuration := 5200
+	roleName := "testIam"
+	assertRoleComponentInput = &aws.AssertIamRoleComponentInput{
+		RoleName:       &roleName,
+		AssertionKey:   "max_duration_session",
+		AssertionValue: &roleMaxDuration,
+	}
+
+	output := &iam.GetRoleOutput{
+		Role: []types.Role{
+			{
+				RoleName:           &roleName,
+				MaxSessionDuration: &roleMaxDuration,
+			},
+		},
+	}
+	ctx := context.Background()
+	client.EXPECT().
+		getRole(ctx, roleName).
+		Times(1).
+		DoAndReturn(
+			func() (output, err error) {
+				return output, nil
+			},
+		)
+
+	AssertIamRoleComponent(fakeTest, ctx, client, assertRoleComponentInput)
+	ctrl.Finish()
+	assert.True(t, fakeTest.Failed())
 
 }

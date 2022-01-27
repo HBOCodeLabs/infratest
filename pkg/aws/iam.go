@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/square/go-jose.v2/json"
 
 	"testing"
@@ -207,4 +208,21 @@ func getIAMRole(context context.Context, client IAMClient, roleName string) (out
 	}
 
 	return IAMRoleOutput, err
+}
+
+type AssertIamRoleComponentInput struct {
+	RoleName       string
+	AssertionKey   string
+	AssertionValue interface{}
+}
+
+func AssertIamRoleComponent(t *testing.T, ctx context.Context, client IAMClient, input AssertIamRoleComponentInput) {
+
+	getIamRoleOutput, err := getIAMRole(ctx, client, input.RoleName)
+	assert.Nil(t, err)
+
+	assertionObject := getIamRoleOutput[input.AssertionKey]
+
+	assert.True(t, assertionObject, input.AssertionValue)
+
 }
