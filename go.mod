@@ -1,6 +1,6 @@
 // Copyright (c) WarnerMedia Direct, LLC. All rights reserved. Licensed under the MIT license.
 // See the LICENSE file for license information.
-module github.com/ppapishe/infratest
+module github.com/hbocodelabs/infratest
 
 go 1.16
 
