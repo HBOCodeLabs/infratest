@@ -4,6 +4,7 @@ package aws
 
 import (
 	"context"
+	"log"
 	"net/url"
 	"reflect"
 
@@ -196,19 +197,27 @@ func unMarshallPolicyDocument(document string) (*PolicyDocument, error) {
 	return &policyDocument, nil
 }
 
-func getIAMRole(context context.Context, client IAMClient, roleName string) (output *iam.GetRoleOutput, err error) {
-
-	getIamRoleInput := &iam.GetRoleInput{
+func getIAMRole(ctx context.Context, client IAMClient, roleName string) (output *iam.GetRoleOutput, err error) {
+	input := &iam.GetRoleInput{
 		RoleName: &roleName,
 	}
 
-	IAMRoleOutput, err := client.GetRole(context, getIamRoleInput)
+	output, err = client.GetRole(ctx, input)
 	if err != nil {
-		return IAMRoleOutput, err
+		return output, err
 	}
+	log.Println(output.Role)
 
-	return IAMRoleOutput, err
+	return output, err
 }
+
+//func getDAXClusterByNameE(ctx context.Context, client DAXClient, name string) (output *dax.DescribeClustersOutput, err error) {
+//	input := &dax.DescribeClustersInput{
+//		ClusterNames: []string{name},
+//	}
+//	output, err = client.DescribeClusters(ctx, input)
+//	return
+//}
 
 type AssertIamRoleComponentInput struct {
 	RoleName       string
@@ -218,11 +227,13 @@ type AssertIamRoleComponentInput struct {
 
 func AssertIamRoleComponent(t *testing.T, ctx context.Context, client IAMClient, input AssertIamRoleComponentInput) {
 
-	getIamRoleOutput, err := getIAMRole(ctx, client, input.RoleName)
+	output, err := getIAMRole(ctx, client, input.RoleName)
 	assert.Nil(t, err)
+	role := output.Role
+	log.Println(role)
+	//key := input.AssertionKey
+	//assertionObject := *output.Role[0].MaxSessionDuration
 
-	assertionObject := getIamRoleOutput[input.AssertionKey]
-
-	assert.True(t, assertionObject, input.AssertionValue)
+	assert.Equal(t, "hello", "hello")
 
 }

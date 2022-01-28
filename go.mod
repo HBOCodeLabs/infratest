@@ -5,6 +5,7 @@ module github.com/hbocodelabs/infratest
 go 1.16
 
 require (
+	github.com/aws/aws-sdk-go v1.42.43 // indirect
 	github.com/aws/aws-sdk-go-v2/service/dax v1.6.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.12.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.11.0

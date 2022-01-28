@@ -3,9 +3,15 @@
 package aws
 
 import (
+	"context"
 	"encoding/json"
 	"net/url"
 	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	gomock "github.com/golang/mock/gomock"
+	"github.com/hbocodelabs/infratest/mock"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -226,33 +232,28 @@ func TestAssertIamRoleComponent_MaxDuration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	client := mock.NewMockIAMClient(ctrl)
 
-	roleMaxDuration := 5200
-	roleName := "testIam"
-	assertRoleComponentInput = &aws.AssertIamRoleComponentInput{
-		RoleName:       &roleName,
+	var roleMaxDuration int32 = 5200
+	var roleName string = "testIam"
+	assertRoleComponentInput := &AssertIamRoleComponentInput{
+		RoleName:       roleName,
 		AssertionKey:   "max_duration_session",
 		AssertionValue: &roleMaxDuration,
 	}
 
+	role := types.Role{
+		RoleName:           &roleName,
+		MaxSessionDuration: &roleMaxDuration,
+	}
 	output := &iam.GetRoleOutput{
-		Role: []types.Role{
-			{
-				RoleName:           &roleName,
-				MaxSessionDuration: &roleMaxDuration,
-			},
-		},
+		Role: &role,
 	}
 	ctx := context.Background()
 	client.EXPECT().
-		getRole(ctx, roleName).
+		GetRole(ctx, &roleName).
 		Times(1).
-		DoAndReturn(
-			func() (output, err error) {
-				return output, nil
-			},
-		)
+		Return(output, nil)
 
-	AssertIamRoleComponent(fakeTest, ctx, client, assertRoleComponentInput)
+	AssertIamRoleComponent(fakeTest, ctx, client, *assertRoleComponentInput)
 	ctrl.Finish()
 	assert.True(t, fakeTest.Failed())
 
