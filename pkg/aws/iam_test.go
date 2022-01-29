@@ -233,11 +233,9 @@ func TestAssertIamRoleComponent_MaxDuration(t *testing.T) {
 	client := mock.NewMockIAMClient(ctrl)
 
 	var roleMaxDuration int32 = 5200
-	var roleName string = "testIam"
-	assertRoleComponentInput := &AssertIamRoleComponentInput{
-		RoleName:       roleName,
-		AssertionKey:   "max_duration_session",
-		AssertionValue: &roleMaxDuration,
+	roleName := "testIam"
+	input := &iam.GetRoleInput{
+		RoleName: &roleName,
 	}
 
 	role := types.Role{
@@ -249,11 +247,11 @@ func TestAssertIamRoleComponent_MaxDuration(t *testing.T) {
 	}
 	ctx := context.Background()
 	client.EXPECT().
-		GetRole(ctx, &roleName).
+		GetRole(ctx, input).
 		Times(1).
 		Return(output, nil)
 
-	AssertIamRoleComponent(fakeTest, ctx, client, *assertRoleComponentInput)
+	AssertIamRoleMaxSessionDuration(fakeTest, ctx, client, roleName, roleMaxDuration)
 	ctrl.Finish()
 	assert.True(t, fakeTest.Failed())
 

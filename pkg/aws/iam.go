@@ -211,29 +211,11 @@ func getIAMRole(ctx context.Context, client IAMClient, roleName string) (output 
 	return output, err
 }
 
-//func getDAXClusterByNameE(ctx context.Context, client DAXClient, name string) (output *dax.DescribeClustersOutput, err error) {
-//	input := &dax.DescribeClustersInput{
-//		ClusterNames: []string{name},
-//	}
-//	output, err = client.DescribeClusters(ctx, input)
-//	return
-//}
-
-type AssertIamRoleComponentInput struct {
-	RoleName       string
-	AssertionKey   string
-	AssertionValue interface{}
-}
-
-func AssertIamRoleComponent(t *testing.T, ctx context.Context, client IAMClient, input AssertIamRoleComponentInput) {
-
-	output, err := getIAMRole(ctx, client, input.RoleName)
+func AssertIamRoleMaxSessionDuration(t *testing.T, ctx context.Context, client IAMClient, roleName string, maxDuration int32) {
+	//maxDurationSec := maxDuration.Seconds()
+	output, err := getIAMRole(ctx, client, roleName)
 	assert.Nil(t, err)
-	role := output.Role
-	log.Println(role)
-	//key := input.AssertionKey
-	//assertionObject := *output.Role[0].MaxSessionDuration
 
-	assert.Equal(t, "hello", "hello")
+	assert.Equal(t, output, maxDuration)
 
 }
