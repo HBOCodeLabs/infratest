@@ -197,6 +197,7 @@ func unMarshallPolicyDocument(document string) (*PolicyDocument, error) {
 	return &policyDocument, nil
 }
 
+// getIAMRole returns the role object struct that has attributes of a given role
 func getIAMRole(ctx context.Context, client IAMClient, roleName string) (output *iam.GetRoleOutput, err error) {
 	input := &iam.GetRoleInput{
 		RoleName: &roleName,
@@ -211,11 +212,11 @@ func getIAMRole(ctx context.Context, client IAMClient, roleName string) (output 
 	return output, err
 }
 
+// Asserts the MaxSessionDuration attribute of a given IAM Role
 func AssertIamRoleMaxSessionDuration(t *testing.T, ctx context.Context, client IAMClient, roleName string, maxDuration int32) {
-	//maxDurationSec := maxDuration.Seconds()
 	output, err := getIAMRole(ctx, client, roleName)
 	assert.Nil(t, err)
 
-	assert.Equal(t, output, maxDuration)
+	assert.Equal(t, *output.Role.MaxSessionDuration, maxDuration)
 
 }

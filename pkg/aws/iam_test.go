@@ -226,7 +226,7 @@ func TestUnMarshallPolicyDocument_DecodeJson(t *testing.T) {
 	assert.Equal(t, policyDocument, *policyDocumentResult)
 }
 
-func TestAssertIamRoleComponent_MaxDuration(t *testing.T) {
+func TestAssertIamRoleComponent_MaxDuration_Success(t *testing.T) {
 	fakeTest := &testing.T{}
 
 	ctrl := gomock.NewController(t)
@@ -252,6 +252,38 @@ func TestAssertIamRoleComponent_MaxDuration(t *testing.T) {
 		Return(output, nil)
 
 	AssertIamRoleMaxSessionDuration(fakeTest, ctx, client, roleName, roleMaxDuration)
+	ctrl.Finish()
+	assert.False(t, fakeTest.Failed())
+
+}
+
+func TestAssertIamRoleComponent_MaxDuration_Fail(t *testing.T) {
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockIAMClient(ctrl)
+
+	var actualRoleMaxDuration int32 = 5200
+	var expectedRoleMaxDuration int32 = 2000
+	roleName := "testIam"
+	input := &iam.GetRoleInput{
+		RoleName: &roleName,
+	}
+
+	role := types.Role{
+		RoleName:           &roleName,
+		MaxSessionDuration: &actualRoleMaxDuration,
+	}
+	output := &iam.GetRoleOutput{
+		Role: &role,
+	}
+	ctx := context.Background()
+	client.EXPECT().
+		GetRole(ctx, input).
+		Times(1).
+		Return(output, nil)
+
+	AssertIamRoleMaxSessionDuration(fakeTest, ctx, client, roleName, expectedRoleMaxDuration)
 	ctrl.Finish()
 	assert.True(t, fakeTest.Failed())
 
