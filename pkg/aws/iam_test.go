@@ -283,7 +283,7 @@ func TestAssertIamRoleComponent_MaxDuration_Fail(t *testing.T) {
 		Times(1).
 		Return(output, nil)
 
-	AssertIamRoleMaxSessionDuration(fakeTest, ctx, client, roleName, expectedRoleMaxDuration)
+	AssertIAMRoleMaxSessionDuration(fakeTest, ctx, client, roleName, expectedRoleMaxDuration)
 	ctrl.Finish()
 	assert.True(t, fakeTest.Failed())
 
