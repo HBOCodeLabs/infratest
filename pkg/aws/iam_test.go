@@ -3,9 +3,15 @@
 package aws
 
 import (
+	"context"
 	"encoding/json"
 	"net/url"
 	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	gomock "github.com/golang/mock/gomock"
+	"github.com/hbocodelabs/infratest/mock"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -218,4 +224,67 @@ func TestUnMarshallPolicyDocument_DecodeJson(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, policyDocument, *policyDocumentResult)
+}
+
+func TestAssertIamRoleComponent_MaxDuration_Success(t *testing.T) {
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockIAMClient(ctrl)
+
+	var roleMaxDuration int32 = 5200
+	roleName := "testIam"
+	input := &iam.GetRoleInput{
+		RoleName: &roleName,
+	}
+
+	role := types.Role{
+		RoleName:           &roleName,
+		MaxSessionDuration: &roleMaxDuration,
+	}
+	output := &iam.GetRoleOutput{
+		Role: &role,
+	}
+	ctx := context.Background()
+	client.EXPECT().
+		GetRole(ctx, input).
+		Times(1).
+		Return(output, nil)
+
+	AssertIAMRoleMaxSessionDuration(fakeTest, ctx, client, roleName, roleMaxDuration)
+	ctrl.Finish()
+	assert.False(t, fakeTest.Failed())
+
+}
+
+func TestAssertIamRoleComponent_MaxDuration_Fail(t *testing.T) {
+	fakeTest := &testing.T{}
+
+	ctrl := gomock.NewController(t)
+	client := mock.NewMockIAMClient(ctrl)
+
+	var actualRoleMaxDuration int32 = 5200
+	var expectedRoleMaxDuration int32 = 2000
+	roleName := "testIam"
+	input := &iam.GetRoleInput{
+		RoleName: &roleName,
+	}
+
+	role := types.Role{
+		RoleName:           &roleName,
+		MaxSessionDuration: &actualRoleMaxDuration,
+	}
+	output := &iam.GetRoleOutput{
+		Role: &role,
+	}
+	ctx := context.Background()
+	client.EXPECT().
+		GetRole(ctx, input).
+		Times(1).
+		Return(output, nil)
+
+	AssertIAMRoleMaxSessionDuration(fakeTest, ctx, client, roleName, expectedRoleMaxDuration)
+	ctrl.Finish()
+	assert.True(t, fakeTest.Failed())
+
 }

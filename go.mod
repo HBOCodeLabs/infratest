@@ -5,6 +5,7 @@ module github.com/hbocodelabs/infratest
 go 1.17
 
 require (
+	github.com/aws/aws-sdk-go v1.42.43 // indirect
 	github.com/aws/aws-sdk-go-v2/service/dax v1.6.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.12.0
 	github.com/aws/aws-sdk-go-v2/service/eks v1.18.0
@@ -25,7 +26,6 @@ require (
 	cloud.google.com/go v0.83.0 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
-	github.com/aws/aws-sdk-go v1.40.56 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.13.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.2.0 // indirect
@@ -69,7 +69,7 @@ require (
 	github.com/urfave/cli v1.22.2 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/sys v0.0.0-20210831042530-f4d43177bf5e // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect

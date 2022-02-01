@@ -29,9 +29,11 @@ tools:
 mock: tools
 	mockgen -source pkg/aws/dax.go -destination mock/dax.go -package mock
 	mockgen -source pkg/aws/ec2.go -destination mock/ec2.go -package mock
+	mockgen -source pkg/aws/iam.go -destination mock/iam.go -package mock
 	mockgen -source pkg/aws/eks.go -destination mock/eks.go -package mock
 	mockgen -source pkg/k8s/jobs.go -destination mock/k8s_jobs.go -package mock
 	mockgen -source pkg/k8s/util.go -destination mock/k8s_util.go -package mock
+
 .PHONY: mock
 
 .PHONY: k8s-integration-test
