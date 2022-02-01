@@ -212,7 +212,7 @@ func getIAMRole(ctx context.Context, client IAMClient, roleName string) (output 
 }
 
 // Asserts the MaxSessionDuration attribute of a given IAM Role
-func AssertIamRoleMaxSessionDuration(t *testing.T, ctx context.Context, client IAMClient, roleName string, maxDuration int32) {
+func AssertIAMRoleMaxSessionDuration(t *testing.T, ctx context.Context, client IAMClient, roleName string, maxDuration int32) {
 	output, err := getIAMRole(ctx, client, roleName)
 	if err != nil {
 		t.Error(err)
