@@ -48,6 +48,20 @@ type AssertEC2TagValueEInput struct {
 	InstanceID string
 }
 
+// AssertEC2VolumeTypeInput is used as an input to the AssertEC2VolumeType methods.
+type AssertEC2VolumeTypeInput struct {
+	// The Instance ID that the tag mustbe set on.
+	InstanceID string
+	// The device ID that the volume is mapped to on the instance.
+	DeviceID string
+	// The Volume Type for each volume
+	VolumeType string
+	// The Volume IOPS for each volume
+	VolumeIops int
+	// The Volume throughput for each volume
+	volumeThroughput int
+}
+
 // AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method.
 type AssertEC2TagValueInput struct {
 	// The name of the tag to assert exists.
@@ -117,6 +131,29 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 
 	assert.True(t, deviceFound, "Volume with device ID '%s' was not found for instance '%s'.", input.DeviceID, input.InstanceID)
 	assert.True(t, deviceEncrypted, "Volume with device ID '%s' for instance '%s' was not encrypted.", input.DeviceID, input.InstanceID)
+}
+
+// AssertVolumeType asserts the right volume type & associated throughput
+func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2VolumeTypeInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+	assert.Nil(t, err)
+
+	for _, v := range instance.BlockDeviceMappings {
+		if *v.DeviceName == input.DeviceID {
+			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+			assert.Nil(t, err)
+			assert.Equal(t, input.VolumeType, *volume.volumeType, "Volume with device ID '%s' for instance '%s' used the right volume type.", input.DeviceID, input.InstanceID)
+			if *volume.Encrypted == trueVal {
+				deviceEncrypted = true
+			}
+			if input.VolumeType != "gp2" {
+				assert.Equal(t, input.VolumeIops, *volume.iops, "Volume with device ID '%s' for instance '%s' used the right iops associated to volume.", input.DeviceID, input.InstanceID)
+				assert.Equal(t, input.VolumeThroughput, *volume.volumeThroughput, "Volume with device ID '%s' for instance '%s' used the right threshold associated to volume.", input.DeviceID, input.InstanceID)
+			}
+		}
+	}
+
 }
 
 // AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
