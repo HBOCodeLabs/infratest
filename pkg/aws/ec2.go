@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -137,12 +138,14 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2VolumeTypeInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
-	assert.Nil(t, err)
+	// assert.Nil(t, err)
+	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
 		if *v.DeviceName == input.DeviceID {
 			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-			assert.Nil(t, err)
+			// assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, input.VolumeType, *volume.volumeType, "Volume with device ID '%s' for instance '%s' used the right volume type.", input.DeviceID, input.InstanceID)
 			if *volume.Encrypted == trueVal {
 				deviceEncrypted = true
