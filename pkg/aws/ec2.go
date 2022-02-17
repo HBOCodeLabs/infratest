@@ -57,7 +57,7 @@ type AssertEC2VolumeTypeInput struct {
 	// The Volume Type for each volume
 	VolumeType string
 	// The Volume IOPS for each volume
-	VolumeIops int
+	VolumeIOPS int
 	// The Volume throughput for each volume
 	volumeThroughput int
 }
