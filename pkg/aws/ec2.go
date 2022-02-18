@@ -146,9 +146,8 @@ func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, in
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
 		// assert.Nil(t, err)
 		require.NoError(t, err)
-		assert.Equal(t, input.VolumeType, *volume.volumeType, "Volume with device ID '%s' used the right volume type.", input.DeviceID)
+		assert.Equal(t, input.VolumeType, *volume.VolumeType, "Volume with device ID '%s' used the right volume type.", input.DeviceID)
 	}
-
 }
 
 // AssertVolumeThroughput & IOPs asserts associated throughput for given volume type
@@ -163,7 +162,7 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 		// assert.Nil(t, err)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeThroughput, *volume.volumeThroughput, "Volume with device ID '%s' used the right threshold associated to volume.", input.DeviceID)
+			assert.Equal(t, input.VolumeThroughput, *volume.Throughput, "Volume with device ID '%s' used the right threshold associated to volume.", input.DeviceID)
 		}
 	}
 }
@@ -180,7 +179,7 @@ func AssertEC2VolumeIops(t *testing.T, ctx context.Context, client EC2Client, in
 		// assert.Nil(t, err)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeIOPS, *volume.iops, "Volume with device ID '%s' used the right iops associated to volume.", input.DeviceID)
+			assert.Equal(t, input.VolumeIOPS, *volume.Iops, "Volume with device ID '%s' used the right iops associated to volume.", input.DeviceID)
 		}
 	}
 }
