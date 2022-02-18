@@ -943,7 +943,7 @@ func TestAssertEC2VolumeType_MatchWithIops(t *testing.T) {
 	fakeTest := &testing.T{}
 
 	// Execute
-	AssertEC2VolumeIops(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+	AssertEC2VolumeIOPS(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
 		DeviceID:         deviceName,
 		InstanceID:       instanceID,
 		VolumeType:       volumeType,
