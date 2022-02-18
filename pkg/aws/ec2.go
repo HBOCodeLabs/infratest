@@ -158,7 +158,7 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeThroughput, *volume.Throughput, "Volume with device ID '%s' used the right threshold associated to volume.", input.DeviceID)
+			assert.Equal(t, input.VolumeThroughput, *volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
 		} else {
 			fmt.Sprintf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
 		}
