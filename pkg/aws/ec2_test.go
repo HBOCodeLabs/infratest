@@ -730,3 +730,227 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, actualOutput)
 }
+
+func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := "gp2"
+	volumeIops := 0
+	volumeThroughput := 0
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeType(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       volumeType,
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := "gp3"
+	volumeIops := 100
+	volumeThroughput := 1000
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeType(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       volumeType,
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertEC2VolumeType_MatchWiththroughput(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := "gp3"
+	volumeIops := 100
+	volumeThroughput := 1000
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeThroughput(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       volumeType,
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertEC2VolumeType_MatchWithIops(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := "gp3"
+	volumeIops := 100
+	volumeThroughput := 1000
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				KmsKeyId:  &kmsKeyID,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeIops(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       volumeType,
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
