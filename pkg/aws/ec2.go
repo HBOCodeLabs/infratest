@@ -144,7 +144,7 @@ func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, in
 	for _, v := range instance.BlockDeviceMappings {
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
 		require.NoError(t, err)
-		assert.Equal(t, input.VolumeType, *volume.VolumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
+		assert.Equal(t, input.VolumeType, volume.VolumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
 	}
 }
 
