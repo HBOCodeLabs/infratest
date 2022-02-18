@@ -49,18 +49,19 @@ type AssertEC2TagValueEInput struct {
 	InstanceID string
 }
 
-// AssertEC2VolumeTypeInput is used as an input to the AssertEC2VolumeType methods.
-type AssertEC2VolumeTypeInput struct {
-	// The Instance ID that the tag mustbe set on.
+// AssertVolumeAttributesInput is used as an input to the AssertEC2VolumeType,AssertEC2VolumeIops,AssertEC2VolumeThroughput  methods.
+type AssertVolumeAttributesInput struct {
+	// The Instance ID that is used to get devices associated to it.
 	InstanceID string
 	// The device ID that the volume is mapped to on the instance.
+	// Used for informational purpose
 	DeviceID string
 	// The Volume Type for each volume
 	VolumeType string
 	// The Volume IOPS for each volume
 	VolumeIOPS int
 	// The Volume throughput for each volume
-	volumeThroughput int
+	VolumeThroughput int
 }
 
 // AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method.
@@ -135,28 +136,53 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 }
 
 // AssertVolumeType asserts the right volume type & associated throughput
-func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2VolumeTypeInput) {
+func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
 	// assert.Nil(t, err)
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
-		if *v.DeviceName == input.DeviceID {
-			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-			// assert.Nil(t, err)
-			require.NoError(t, err)
-			assert.Equal(t, input.VolumeType, *volume.volumeType, "Volume with device ID '%s' for instance '%s' used the right volume type.", input.DeviceID, input.InstanceID)
-			if *volume.Encrypted == trueVal {
-				deviceEncrypted = true
-			}
-			if input.VolumeType != "gp2" {
-				assert.Equal(t, input.VolumeIops, *volume.iops, "Volume with device ID '%s' for instance '%s' used the right iops associated to volume.", input.DeviceID, input.InstanceID)
-				assert.Equal(t, input.VolumeThroughput, *volume.volumeThroughput, "Volume with device ID '%s' for instance '%s' used the right threshold associated to volume.", input.DeviceID, input.InstanceID)
-			}
-		}
+		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+		// assert.Nil(t, err)
+		require.NoError(t, err)
+		assert.Equal(t, input.VolumeType, *volume.volumeType, "Volume with device ID '%s' used the right volume type.", input.DeviceID)
 	}
 
+}
+
+// AssertVolumeThroughput & IOPs asserts associated throughput for given volume type
+func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+	// assert.Nil(t, err)
+	require.NoError(t, err)
+
+	for _, v := range instance.BlockDeviceMappings {
+		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+		// assert.Nil(t, err)
+		require.NoError(t, err)
+		if input.VolumeType != "gp2" {
+			assert.Equal(t, input.VolumeThroughput, *volume.volumeThroughput, "Volume with device ID '%s' used the right threshold associated to volume.", input.DeviceID)
+		}
+	}
+}
+
+// AssertVolumeIops asserts associated Iops for given volume type
+func AssertEC2VolumeIops(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+	// assert.Nil(t, err)
+	require.NoError(t, err)
+
+	for _, v := range instance.BlockDeviceMappings {
+		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+		// assert.Nil(t, err)
+		require.NoError(t, err)
+		if input.VolumeType != "gp2" {
+			assert.Equal(t, input.VolumeIOPS, *volume.iops, "Volume with device ID '%s' used the right iops associated to volume.", input.DeviceID)
+		}
+	}
 }
 
 // AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
