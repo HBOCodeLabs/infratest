@@ -166,7 +166,7 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 }
 
 // AssertVolumeIops asserts associated Iops for given volume type
-func AssertEC2VolumeIops(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
+func AssertEC2VolumeIOPS(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
 	require.NoError(t, err)
