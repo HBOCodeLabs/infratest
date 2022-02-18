@@ -139,12 +139,10 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
-	// assert.Nil(t, err)
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-		// assert.Nil(t, err)
 		require.NoError(t, err)
 		assert.Equal(t, input.VolumeType, *volume.VolumeType, "Volume with device ID '%s' used the right volume type.", input.DeviceID)
 	}
@@ -154,12 +152,10 @@ func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, in
 func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
-	// assert.Nil(t, err)
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-		// assert.Nil(t, err)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
 			assert.Equal(t, input.VolumeThroughput, *volume.Throughput, "Volume with device ID '%s' used the right threshold associated to volume.", input.DeviceID)
@@ -171,12 +167,10 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 func AssertEC2VolumeIops(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
-	// assert.Nil(t, err)
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-		// assert.Nil(t, err)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
 			assert.Equal(t, input.VolumeIOPS, *volume.Iops, "Volume with device ID '%s' used the right iops associated to volume.", input.DeviceID)
