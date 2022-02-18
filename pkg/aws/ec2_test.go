@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/golang/mock/gomock"
 	"github.com/hbocodelabs/infratest/mock"
 	"github.com/stretchr/testify/assert"
@@ -738,9 +739,9 @@ func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
 	deviceName := "/dev/sdc"
 	kmsKeyID := "/key/id"
 	encrypted := true
-	volumeType := "gp2"
-	volumeIops := 0
-	volumeThroughput := 0
+	volumeType := types.VolumeTypeGp2
+	volumeIops := aws.Int32(0)
+	volumeThroughput := aws.Int32(0)
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -763,8 +764,9 @@ func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
 			{
-				Encrypted: &encrypted,
-				KmsKeyId:  &kmsKeyID,
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
 			},
 		},
 	}
@@ -778,7 +780,7 @@ func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
 	AssertEC2VolumeType(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
 		DeviceID:         deviceName,
 		InstanceID:       instanceID,
-		VolumeType:       volumeType,
+		VolumeType:       "gp2",
 		VolumeIOPS:       volumeIops,
 		VolumeThroughput: volumeThroughput,
 	})
@@ -794,9 +796,9 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 	deviceName := "/dev/sdc"
 	kmsKeyID := "/key/id"
 	encrypted := true
-	volumeType := "gp3"
-	volumeIops := 100
-	volumeThroughput := 1000
+	volumeType := types.VolumeTypeGp3
+	volumeIops := aws.Int32(100)
+	volumeThroughput := aws.Int32(1000)
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -819,8 +821,9 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
 			{
-				Encrypted: &encrypted,
-				KmsKeyId:  &kmsKeyID,
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
 			},
 		},
 	}
@@ -834,7 +837,7 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 	AssertEC2VolumeType(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
 		DeviceID:         deviceName,
 		InstanceID:       instanceID,
-		VolumeType:       volumeType,
+		VolumeType:       "gp3",
 		VolumeIOPS:       volumeIops,
 		VolumeThroughput: volumeThroughput,
 	})
@@ -850,9 +853,9 @@ func TestAssertEC2VolumeType_MatchWiththroughput(t *testing.T) {
 	deviceName := "/dev/sdc"
 	kmsKeyID := "/key/id"
 	encrypted := true
-	volumeType := "gp3"
-	volumeIops := 100
-	volumeThroughput := 1000
+	volumeType := types.VolumeTypeGp3
+	volumeIops := aws.Int32(100)
+	volumeThroughput := aws.Int32(1000)
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -875,8 +878,11 @@ func TestAssertEC2VolumeType_MatchWiththroughput(t *testing.T) {
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
 			{
-				Encrypted: &encrypted,
-				KmsKeyId:  &kmsKeyID,
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
+				Throughput: volumeThroughput,
+				Iops:       volumeIops,
 			},
 		},
 	}
@@ -890,7 +896,7 @@ func TestAssertEC2VolumeType_MatchWiththroughput(t *testing.T) {
 	AssertEC2VolumeThroughput(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
 		DeviceID:         deviceName,
 		InstanceID:       instanceID,
-		VolumeType:       volumeType,
+		VolumeType:       "gp3",
 		VolumeIOPS:       volumeIops,
 		VolumeThroughput: volumeThroughput,
 	})
@@ -906,9 +912,9 @@ func TestAssertEC2VolumeType_MatchWithIops(t *testing.T) {
 	deviceName := "/dev/sdc"
 	kmsKeyID := "/key/id"
 	encrypted := true
-	volumeType := "gp3"
-	volumeIops := 100
-	volumeThroughput := 1000
+	volumeType := types.VolumeTypeGp3
+	volumeIops := aws.Int32(100)
+	volumeThroughput := aws.Int32(1000)
 	instanceOutput := &ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -931,8 +937,11 @@ func TestAssertEC2VolumeType_MatchWithIops(t *testing.T) {
 	volumeOutput := &ec2.DescribeVolumesOutput{
 		Volumes: []types.Volume{
 			{
-				Encrypted: &encrypted,
-				KmsKeyId:  &kmsKeyID,
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
+				Throughput: volumeThroughput,
+				Iops:       volumeIops,
 			},
 		},
 	}
@@ -946,7 +955,7 @@ func TestAssertEC2VolumeType_MatchWithIops(t *testing.T) {
 	AssertEC2VolumeIOPS(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
 		DeviceID:         deviceName,
 		InstanceID:       instanceID,
-		VolumeType:       volumeType,
+		VolumeType:       "gp3",
 		VolumeIOPS:       volumeIops,
 		VolumeThroughput: volumeThroughput,
 	})

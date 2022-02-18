@@ -59,9 +59,9 @@ type AssertVolumeAttributesInput struct {
 	// The Volume Type for each volume
 	VolumeType string
 	// The Volume IOPS for each volume
-	VolumeIOPS int
+	VolumeIOPS *int32
 	// The Volume throughput for each volume
-	VolumeThroughput int
+	VolumeThroughput *int32
 }
 
 // AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method.
@@ -139,12 +139,14 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
 		require.NoError(t, err)
-		assert.Equal(t, input.VolumeType, volume.VolumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
+		volumeType := fmt.Sprintf("%v", volume.VolumeType)
+		assert.Equal(t, input.VolumeType, volumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
 	}
 }
 
@@ -158,7 +160,7 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeThroughput, *volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
+			assert.Equal(t, input.VolumeThroughput, volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
 		} else {
 			fmt.Printf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
 		}
@@ -175,7 +177,7 @@ func AssertEC2VolumeIOPS(t *testing.T, ctx context.Context, client EC2Client, in
 		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
 		require.NoError(t, err)
 		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeIOPS, *volume.Iops, "Volume with device ID '%s' does not have the right IOPS value associated to volume.", input.DeviceID)
+			assert.Equal(t, input.VolumeIOPS, volume.Iops, "Volume with device ID '%s' does not have the right IOPS value associated to volume.", input.DeviceID)
 		} else {
 			fmt.Printf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
 		}
