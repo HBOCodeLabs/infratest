@@ -17,7 +17,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1
 	k8s.io/api v0.23.1
 	k8s.io/apimachinery v0.23.1
-	k8s.io/client-go v1.5.2
+	k8s.io/client-go v1.5.2 // indirect
 	sigs.k8s.io/aws-iam-authenticator v0.5.5
 	sigs.k8s.io/kind v0.11.1
 )
