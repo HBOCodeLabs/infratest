@@ -846,7 +846,7 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWiththroughput(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
