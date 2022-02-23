@@ -905,7 +905,7 @@ func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithIops(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithIOPS(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
