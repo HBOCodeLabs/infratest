@@ -135,7 +135,7 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 	assert.True(t, deviceEncrypted, "Volume with device ID '%s' for instance '%s' was not encrypted.", input.DeviceID, input.InstanceID)
 }
 
-// AssertVolumeType asserts the right volume type & associated throughput
+// AssertVolumeType asserts the right volume type
 func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
 
 	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
