@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -46,6 +47,21 @@ type AssertEC2TagValueEInput struct {
 	Value string
 	// The Instance ID that the tag mustbe set on.
 	InstanceID string
+}
+
+// AssertVolumeAttributesInput is used as an input to the AssertEC2VolumeType,AssertEC2VolumeIops,AssertEC2VolumeThroughput  methods.
+type AssertVolumeAttributesInput struct {
+	// The Instance ID that is used to get devices associated to it.
+	InstanceID string
+	// The device ID that the volume is mapped to on the instance.
+	// Used for informational purpose
+	DeviceID string
+	// The Volume Type for each volume
+	VolumeType string
+	// The Volume IOPS for each volume
+	VolumeIOPS *int32
+	// The Volume throughput for each volume
+	VolumeThroughput *int32
 }
 
 // AssertEC2TagValueInput is used as an input to the AssertEC2TagValue method.
@@ -117,6 +133,55 @@ func AssertEC2VolumeEncrypted(t *testing.T, ctx context.Context, client EC2Clien
 
 	assert.True(t, deviceFound, "Volume with device ID '%s' was not found for instance '%s'.", input.DeviceID, input.InstanceID)
 	assert.True(t, deviceEncrypted, "Volume with device ID '%s' for instance '%s' was not encrypted.", input.DeviceID, input.InstanceID)
+}
+
+// AssertVolumeType asserts the right volume type
+func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+
+	require.NoError(t, err)
+
+	for _, v := range instance.BlockDeviceMappings {
+		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+		require.NoError(t, err)
+		volumeType := fmt.Sprintf("%v", volume.VolumeType)
+		assert.Equal(t, input.VolumeType, volumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
+	}
+}
+
+// AssertVolumeThroughput & IOPs asserts associated throughput for given volume type
+func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+	require.NoError(t, err)
+
+	for _, v := range instance.BlockDeviceMappings {
+		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+		require.NoError(t, err)
+		if input.VolumeType != "gp2" {
+			assert.Equal(t, input.VolumeThroughput, volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
+		} else {
+			t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+		}
+	}
+}
+
+// AssertVolumeIops asserts associated Iops for given volume type
+func AssertEC2VolumeIOPS(t *testing.T, ctx context.Context, client EC2Client, input AssertVolumeAttributesInput) {
+
+	instance, err := getEC2InstanceByInstanceIDE(ctx, client, input.InstanceID)
+	require.NoError(t, err)
+
+	for _, v := range instance.BlockDeviceMappings {
+		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+		require.NoError(t, err)
+		if input.VolumeType != "gp2" {
+			assert.Equal(t, input.VolumeIOPS, volume.Iops, "Volume with device ID '%s' does not have the right IOPS value associated to volume.", input.DeviceID)
+		} else {
+			t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+		}
+	}
 }
 
 // AssertEC2TagValue asserts that an EC2 instance has a tag with the given value.
