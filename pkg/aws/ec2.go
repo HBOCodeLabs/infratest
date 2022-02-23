@@ -162,7 +162,7 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 		if input.VolumeType != "gp2" {
 			assert.Equal(t, input.VolumeThroughput, volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
 		} else {
-			fmt.Printf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+			t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
 		}
 	}
 }
@@ -179,7 +179,7 @@ func AssertEC2VolumeIOPS(t *testing.T, ctx context.Context, client EC2Client, in
 		if input.VolumeType != "gp2" {
 			assert.Equal(t, input.VolumeIOPS, volume.Iops, "Volume with device ID '%s' does not have the right IOPS value associated to volume.", input.DeviceID)
 		} else {
-			fmt.Printf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+			t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
 		}
 	}
 }
