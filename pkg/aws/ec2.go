@@ -143,10 +143,12 @@ func AssertEC2VolumeType(t *testing.T, ctx context.Context, client EC2Client, in
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
-		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-		require.NoError(t, err)
-		volumeType := fmt.Sprintf("%v", volume.VolumeType)
-		assert.Equal(t, input.VolumeType, volumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
+		if *v.DeviceName == input.DeviceID {
+			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+			require.NoError(t, err)
+			volumeType := fmt.Sprintf("%v", volume.VolumeType)
+			assert.Equal(t, input.VolumeType, volumeType, "Volume with device ID '%s' does not have the right volume type.", input.DeviceID)
+		}
 	}
 }
 
@@ -157,12 +159,14 @@ func AssertEC2VolumeThroughput(t *testing.T, ctx context.Context, client EC2Clie
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
-		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-		require.NoError(t, err)
-		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeThroughput, volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
-		} else {
-			t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+		if *v.DeviceName == input.DeviceID {
+			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+			require.NoError(t, err)
+			if input.VolumeType != "gp2" {
+				assert.Equal(t, input.VolumeThroughput, volume.Throughput, "Volume with device ID '%s' does not have the right throughput associated to volume.", input.DeviceID)
+			} else {
+				t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+			}
 		}
 	}
 }
@@ -174,12 +178,14 @@ func AssertEC2VolumeIOPS(t *testing.T, ctx context.Context, client EC2Client, in
 	require.NoError(t, err)
 
 	for _, v := range instance.BlockDeviceMappings {
-		volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
-		require.NoError(t, err)
-		if input.VolumeType != "gp2" {
-			assert.Equal(t, input.VolumeIOPS, volume.Iops, "Volume with device ID '%s' does not have the right IOPS value associated to volume.", input.DeviceID)
-		} else {
-			t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+		if *v.DeviceName == input.DeviceID {
+			volume, err := getEC2VolumeByVolumeIDE(ctx, client, *v.Ebs.VolumeId)
+			require.NoError(t, err)
+			if input.VolumeType != "gp2" {
+				assert.Equal(t, input.VolumeIOPS, volume.Iops, "Volume with device ID '%s' does not have the right IOPS value associated to volume.", input.DeviceID)
+			} else {
+				t.Logf("This test is ignored since it is not gp3 volume type : %s", input.VolumeType)
+			}
 		}
 	}
 }
