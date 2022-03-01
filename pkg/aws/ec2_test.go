@@ -732,11 +732,12 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 	assert.Equal(t, expectedOutput, actualOutput)
 }
 
-func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithGP2MultipleDevices(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
 	kmsKeyID := "/key/id"
 	encrypted := true
 	volumeType := types.VolumeTypeGp2
@@ -751,6 +752,12 @@ func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
 							{
 								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
 								},
@@ -789,11 +796,12 @@ func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithGP3MultipleDevices(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
 	kmsKeyID := "/key/id"
 	encrypted := true
 	volumeType := types.VolumeTypeGp3
@@ -808,6 +816,12 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
 							{
 								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
 								},
@@ -846,11 +860,12 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithThroughputMultipleDevices(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
 	kmsKeyID := "/key/id"
 	encrypted := true
 	volumeType := types.VolumeTypeGp3
@@ -865,6 +880,12 @@ func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
 							{
 								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
 								},
@@ -905,11 +926,12 @@ func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithIOPS(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithIOPSMultipleDevices(t *testing.T) {
 	// Setup
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
 	kmsKeyID := "/key/id"
 	encrypted := true
 	volumeType := types.VolumeTypeGp3
@@ -924,6 +946,12 @@ func TestAssertEC2VolumeType_MatchWithIOPS(t *testing.T) {
 						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
 							{
 								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
 								Ebs: &types.EbsInstanceBlockDevice{
 									VolumeId: &volumeId,
 								},
@@ -959,7 +987,6 @@ func TestAssertEC2VolumeType_MatchWithIOPS(t *testing.T) {
 		VolumeIOPS:       volumeIops,
 		VolumeThroughput: volumeThroughput,
 	})
-
 	// Assert
 	assert.False(t, fakeTest.Failed())
 }
