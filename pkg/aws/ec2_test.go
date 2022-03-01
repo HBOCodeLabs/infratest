@@ -734,6 +734,7 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 
 func TestAssertEC2VolumeType_MatchWithGP2MultipleDevices(t *testing.T) {
 	// Setup
+	t.Parallel()
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
@@ -798,6 +799,7 @@ func TestAssertEC2VolumeType_MatchWithGP2MultipleDevices(t *testing.T) {
 
 func TestAssertEC2VolumeType_MatchWithGP3MultipleDevices(t *testing.T) {
 	// Setup
+	t.Parallel()
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
@@ -862,6 +864,7 @@ func TestAssertEC2VolumeType_MatchWithGP3MultipleDevices(t *testing.T) {
 
 func TestAssertEC2VolumeType_MatchWithThroughputMultipleDevices(t *testing.T) {
 	// Setup
+	t.Parallel()
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
@@ -928,6 +931,7 @@ func TestAssertEC2VolumeType_MatchWithThroughputMultipleDevices(t *testing.T) {
 
 func TestAssertEC2VolumeType_MatchWithIOPSMultipleDevices(t *testing.T) {
 	// Setup
+	// t.Parallel()
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
@@ -973,14 +977,20 @@ func TestAssertEC2VolumeType_MatchWithIOPSMultipleDevices(t *testing.T) {
 			},
 		},
 	}
-	clientMock := &EC2ClientMock{
-		DescribeInstancesOutput: instanceOutput,
-		DescribeVolumesOutput:   volumeOutput,
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	DescribeInstancesInput := &ec2.DescribeInstancesInput{
+		InstanceIds: []string{instanceID},
 	}
+	expectedInput := &ec2.DescribeVolumesInput{
+		VolumeIds: []string{deviceName},
+	}
+	ctx := context.Background()
 	fakeTest := &testing.T{}
-
+	clientMock.EXPECT().DescribeInstances(ctx, DescribeInstancesInput).Times(2).Return(instanceOutput, nil)
+	clientMock.EXPECT().DescribeVolumes(ctx, expectedInput).Times(1).Return(volumeOutput, nil)
 	// Execute
-	AssertEC2VolumeIOPS(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+	AssertEC2VolumeIOPS(fakeTest, ctx, clientMock, AssertVolumeAttributesInput{
 		DeviceID:         deviceName,
 		InstanceID:       instanceID,
 		VolumeType:       "gp3",
