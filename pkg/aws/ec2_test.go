@@ -732,7 +732,7 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 	assert.Equal(t, expectedOutput, actualOutput)
 }
 
-func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithGP2MultipleDevices(t *testing.T) {
 	// Setup
 	t.Parallel()
 	instanceID := "i546acas321sd"
@@ -804,7 +804,7 @@ func TestAssertEC2VolumeType_MatchWithGP2(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithGP3MultipleDevices(t *testing.T) {
 	// Setup
 	t.Parallel()
 	instanceID := "i546acas321sd"
@@ -876,7 +876,7 @@ func TestAssertEC2VolumeType_MatchWithGP3(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithThroughputMultipleDevices(t *testing.T) {
 	// Setup
 	t.Parallel()
 	instanceID := "i546acas321sd"
@@ -950,7 +950,7 @@ func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2VolumeType_MatchWithIOPS(t *testing.T) {
+func TestAssertEC2VolumeType_MatchWithIOPSMultipleDevices(t *testing.T) {
 	// Setup
 	// t.Parallel()
 	instanceID := "i546acas321sd"
