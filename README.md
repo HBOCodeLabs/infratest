@@ -91,9 +91,10 @@ used unless there is a compelling reason to use something else.
 
 | Library Name  / URL                             | Used For                                                                  |
 |-------------------------------------------------|---------------------------------------------------------------------------|
-| github.com/stretchr/testify/assert              | Asserting actual values equal some expected value.                        |
+| github.com/stretchr/testify                     | Asserting actual values equal some expected value.                        |
 | github.com/aws/aws-sdk-go-v2                    | All AWS related interactions.                                             |
 | gopkg.in/square/go-jose.v2/json                 | JSON manipulation, marshalling, etc                                       |
+| k8s.io/client-go                                | Kubernetes interactions                                                   |
 
 ### Use of interfaces rather than direct types
 

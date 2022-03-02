@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/golang/mock/gomock"
@@ -489,94 +490,35 @@ func TestAssertEC2TagValue_NoMatch(t *testing.T) {
 			},
 		},
 	}
-	clientMock := &EC2ClientMock{
-		DescribeTagsOutput: describeTagsOutput,
-		Test:               t,
-	}
-	describeTagsInput := AssertEC2TagValueInput{
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	assertEC2TagValueInput := AssertEC2TagValueInput{
 		TagName:    tagName,
 		Value:      tagValue,
 		InstanceID: instanceID,
+	}
+	resourceTypeFilterName := resourceTypeFilterName
+	resourceTypeFilterValue := resourceTypeFilterValueInstance
+	resourceIDFilterName := resourceIDFilterName
+	describeTagsInput := &ec2.DescribeTagsInput{
+		Filters: []types.Filter{
+			{
+				Name:   &resourceTypeFilterName,
+				Values: []string{resourceTypeFilterValue},
+			},
+			{
+				Name:   &resourceIDFilterName,
+				Values: []string{instanceID},
+			},
+		},
 	}
 	ctx := context.Background()
 	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeTags(ctx, describeTagsInput).Times(1).Return(describeTagsOutput, nil)
 
 	// Test
-	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
+	AssertEC2TagValue(fakeTest, ctx, clientMock, assertEC2TagValueInput)
 	assert.True(t, fakeTest.Failed(), "AssertEC2TagValue did not fail the test when the tag value did not match.")
-}
-
-func TestAssertEC2TagValueE_NoMatch(t *testing.T) {
-	// Setup
-	instanceID := "i546acas321sd"
-	tagName := "MyTag"
-	tagValue := "TagValue"
-	wrongTagValue := "OtherValue"
-	nextToken := ""
-	describeTagsOutput := &ec2.DescribeTagsOutput{
-		NextToken: &nextToken,
-		Tags: []types.TagDescription{
-			{
-				ResourceId:   &instanceID,
-				ResourceType: types.ResourceTypeInstance,
-				Key:          &tagName,
-				Value:        &wrongTagValue,
-			},
-		},
-	}
-	clientMock := &EC2ClientMock{
-		DescribeTagsOutput: describeTagsOutput,
-		Test:               t,
-	}
-	describeTagsInput := AssertEC2TagValueEInput{
-		TagName:    tagName,
-		Value:      tagValue,
-		InstanceID: instanceID,
-	}
-	ctx := context.Background()
-
-	// Test
-	result, err := AssertEC2TagValueE(ctx, clientMock, describeTagsInput)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.False(t, result, "AssertEC2TagValueE returned 'true' when tag value did not match.")
-}
-
-func TestAssertEC2TagValueE_Match(t *testing.T) {
-	// Setup
-	instanceID := "i546acas321sd"
-	tagName := "MyTag"
-	tagValue := "TagValue"
-	nextToken := ""
-	describeTagsOutput := &ec2.DescribeTagsOutput{
-		NextToken: &nextToken,
-		Tags: []types.TagDescription{
-			{
-				ResourceId:   &instanceID,
-				ResourceType: types.ResourceTypeInstance,
-				Key:          &tagName,
-				Value:        &tagValue,
-			},
-		},
-	}
-	clientMock := &EC2ClientMock{
-		DescribeTagsOutput: describeTagsOutput,
-		Test:               t,
-	}
-	describeTagsInput := AssertEC2TagValueEInput{
-		TagName:    tagName,
-		Value:      tagValue,
-		InstanceID: instanceID,
-	}
-	ctx := context.Background()
-
-	// Test
-	result, err := AssertEC2TagValueE(ctx, clientMock, describeTagsInput)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.True(t, result, "AssertEC2TagValueE returned 'false' when tag value matched.")
 }
 
 func TestAssertEC2TagValue_Match(t *testing.T) {
@@ -596,20 +538,34 @@ func TestAssertEC2TagValue_Match(t *testing.T) {
 			},
 		},
 	}
-	clientMock := &EC2ClientMock{
-		DescribeTagsOutput: describeTagsOutput,
-		Test:               t,
-	}
-	describeTagsInput := AssertEC2TagValueInput{
+	assertEC2TagValueInput := AssertEC2TagValueInput{
 		TagName:    tagName,
 		Value:      tagValue,
 		InstanceID: instanceID,
 	}
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	resourceTypeFilterName := resourceTypeFilterName
+	resourceTypeFilterValue := resourceTypeFilterValueInstance
+	resourceIDFilterName := resourceIDFilterName
+	describeTagsInput := &ec2.DescribeTagsInput{
+		Filters: []types.Filter{
+			{
+				Name:   &resourceTypeFilterName,
+				Values: []string{resourceTypeFilterValue},
+			},
+			{
+				Name:   &resourceIDFilterName,
+				Values: []string{instanceID},
+			},
+		},
+	}
 	ctx := context.Background()
 	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeTags(ctx, describeTagsInput).Times(1).Return(describeTagsOutput, nil)
 
 	// Test
-	AssertEC2TagValue(fakeTest, ctx, clientMock, describeTagsInput)
+	AssertEC2TagValue(fakeTest, ctx, clientMock, assertEC2TagValueInput)
 	assert.False(t, fakeTest.Failed(), "AssertEC2TagValue failed the test when tag value matched.")
 }
 
@@ -774,4 +730,263 @@ func TestGetEC2SecurityGroupByNameE(t *testing.T) {
 	// Assert
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, actualOutput)
+}
+
+func TestAssertEC2VolumeType_MatchWithGP2MultipleDevices(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := types.VolumeTypeGp2
+	volumeIops := aws.Int32(0)
+	volumeThroughput := aws.Int32(0)
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeType(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       "gp2",
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertEC2VolumeType_MatchWithGP3MultipleDevices(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := types.VolumeTypeGp3
+	volumeIops := aws.Int32(100)
+	volumeThroughput := aws.Int32(1000)
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeType(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       "gp3",
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertEC2VolumeType_MatchWithThroughputMultipleDevices(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := types.VolumeTypeGp3
+	volumeIops := aws.Int32(100)
+	volumeThroughput := aws.Int32(1000)
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
+				Throughput: volumeThroughput,
+				Iops:       volumeIops,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeThroughput(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       "gp3",
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+
+	// Assert
+	assert.False(t, fakeTest.Failed())
+}
+
+func TestAssertEC2VolumeType_MatchWithIOPSMultipleDevices(t *testing.T) {
+	// Setup
+	instanceID := "i546acas321sd"
+	volumeId := "v123dfasd92"
+	deviceName := "/dev/sdc"
+	excludedDeviceName := "/dev/sdd"
+	kmsKeyID := "/key/id"
+	encrypted := true
+	volumeType := types.VolumeTypeGp3
+	volumeIops := aws.Int32(100)
+	volumeThroughput := aws.Int32(1000)
+	instanceOutput := &ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: &instanceID,
+						BlockDeviceMappings: []types.InstanceBlockDeviceMapping{
+							{
+								DeviceName: &deviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+							{
+								DeviceName: &excludedDeviceName,
+								Ebs: &types.EbsInstanceBlockDevice{
+									VolumeId: &volumeId,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted:  &encrypted,
+				KmsKeyId:   &kmsKeyID,
+				VolumeType: volumeType,
+				Throughput: volumeThroughput,
+				Iops:       volumeIops,
+			},
+		},
+	}
+	clientMock := &EC2ClientMock{
+		DescribeInstancesOutput: instanceOutput,
+		DescribeVolumesOutput:   volumeOutput,
+	}
+	fakeTest := &testing.T{}
+
+	// Execute
+	AssertEC2VolumeIOPS(fakeTest, context.Background(), clientMock, AssertVolumeAttributesInput{
+		DeviceID:         deviceName,
+		InstanceID:       instanceID,
+		VolumeType:       "gp3",
+		VolumeIOPS:       volumeIops,
+		VolumeThroughput: volumeThroughput,
+	})
+	// Assert
+	assert.False(t, fakeTest.Failed())
 }

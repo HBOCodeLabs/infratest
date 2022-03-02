@@ -10,14 +10,29 @@ jobs:
       - name: Set up Golang
         uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.17
       - name: Check out source code
         uses: actions/checkout@v2
       - name: Run tests
         run: make
-      # Left here for future consideration
-      # - name: Comment PR
-      #   uses: thollander/actions-comment-pull-request@v1
-      #   with:
-      #     message: 'Example of message !'
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  k8s_integration_test:
+    name: Run k8s integration tests
+    runs-on: ubuntu-20.04
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s_version:
+          - 1.22.4          
+          - 1.21.2
+          - 1.20.7
+          - 1.19.11
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.17
+      - name: Check out source code
+        uses: actions/checkout@v2
+      - name: Run k8s integration tests
+        run: make k8s-integration-test K8S_VERSION=${{ matrix.k8s_version }}

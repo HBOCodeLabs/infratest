@@ -8,10 +8,16 @@ import (
 	"reflect"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/square/go-jose.v2/json"
 
 	"testing"
 )
+
+// IAMClient serves as a stub client interface for the AWS SDK [IAM client](https://pkg.go.dev/github.com/aws/aws-sdk-go/service/iam#hdr-Using_the_Client).
+type IAMClient interface {
+	GetRole(context.Context, *iam.GetRoleInput, ...func(*iam.Options)) (*iam.GetRoleOutput, error)
+}
 
 type PolicyDocument struct {
 	Version   string
@@ -189,4 +195,31 @@ func unMarshallPolicyDocument(document string) (*PolicyDocument, error) {
 		return &PolicyDocument{}, err
 	}
 	return &policyDocument, nil
+}
+
+// getIAMRole returns the role object struct that has attributes of a given role
+func getIAMRole(ctx context.Context, client IAMClient, roleName string) (output *iam.GetRoleOutput, err error) {
+	input := &iam.GetRoleInput{
+		RoleName: &roleName,
+	}
+
+	output, err = client.GetRole(ctx, input)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// Asserts the MaxSessionDuration attribute of a given IAM Role
+func AssertIAMRoleMaxSessionDuration(t *testing.T, ctx context.Context, client IAMClient, roleName string, maxDuration int32) {
+	output, err := getIAMRole(ctx, client, roleName)
+	if err != nil {
+		t.Error(err)
+
+		return
+	}
+
+	assert.Equal(t, *output.Role.MaxSessionDuration, maxDuration, "Role %s Has an incorrect max session duration value", roleName)
+
 }
