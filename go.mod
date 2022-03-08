@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eks v1.18.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.11.0
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.12.0
+	github.com/gocql/gocql v0.0.0-20220224095938-0eacd3183625
 	github.com/golang/mock v1.6.0
 	github.com/gruntwork-io/terratest v0.38.8
 	github.com/stretchr/testify v1.7.0
@@ -41,11 +42,13 @@ require (
 	github.com/gofrs/flock v0.7.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/gruntwork-io/go-commons v0.8.0 // indirect
+	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
