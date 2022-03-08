@@ -22,4 +22,5 @@ tools:
 mock: tools
 	mockgen -source pkg/aws/dax.go -destination mock/dax.go -package mock
 	mockgen -source pkg/aws/ec2.go -destination mock/ec2.go -package mock
+	mockgen -source pkg/cassandra/cassandra.go -destination mock/cassandra.go -package mock
 .PHONY: mock
