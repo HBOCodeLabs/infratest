@@ -952,7 +952,7 @@ func TestAssertEC2VolumeType_MatchWithThroughput(t *testing.T) {
 
 func TestAssertEC2VolumeType_MatchWithIOPS(t *testing.T) {
 	// Setup
-	// t.Parallel()
+	t.Parallel()
 	instanceID := "i546acas321sd"
 	volumeId := "v123dfasd92"
 	deviceName := "/dev/sdc"
