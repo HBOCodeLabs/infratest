@@ -17,6 +17,7 @@ import (
 // Typically, it's a [Route53](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/route53#Client).
 type Route53Client interface {
 	ListHostedZonesByName(context.Context, *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error)
+	ListHostedZonesByVPC(context.Context, *route53.ListHostedZonesByVPCInput) (*route53.ListHostedZonesByVPCOutput, error)
 	ListResourceRecordSets(context.Context, *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error)
 }
 
@@ -65,13 +66,60 @@ func AssertRoute53RecordExistsInHostedZone(t *testing.T, ctx context.Context, cl
 	assert.Nil(t, err)
 
 	for _, r := range recs.ResourceRecordSets {
-		if strings.ToLower(*r.Name) == strings.ToLower(recordName) && &recordInput.RecordType != nil && r.Type == recordInput.RecordType {
-			recordFound = true
-			break
+		if recordInput.RecordType == "" || r.Type == recordInput.RecordType {
+			recordFound = strings.EqualFold(*r.Name, recordName)
+
+			if recordFound {
+				break
+			}
 		}
 	}
 
 	assert.True(t, recordFound, fmt.Sprintf("record '%s' not found", recordName))
+}
+
+// AssertRoute53ZoneIsAssociatedVPCInput is used as input to the AssertRoute53ZoneIsAssociatedWithVPC method.
+type AssertRoute53ZoneIsAssociatedWithVPCInput struct {
+	// The ID of the VPC to check for zone association (required).
+	VPCID string
+
+	// The region of the VPC to check for zone association (required).
+	VPCRegion types.VPCRegion
+
+	// The name of the zone to check for VPC association (required).
+	ZoneName string
+}
+
+// AssertRoute53ZoneIsAssociatedWithVPC asserts whether or not the Route53 zone
+// is associated with the given VPC.
+func AssertRoute53ZoneIsAssociatedWithVPC(t *testing.T, ctx context.Context, client Route53Client, associationInput AssertRoute53ZoneIsAssociatedWithVPCInput) {
+	input := route53.ListHostedZonesByVPCInput{
+		VPCId:     &associationInput.VPCID,
+		VPCRegion: associationInput.VPCRegion,
+	}
+	zones := make([]string, 0)
+
+	for {
+		output, err := client.ListHostedZonesByVPC(ctx, &input)
+		assert.Nil(t, err)
+		for _, zone := range output.HostedZoneSummaries {
+			zones = append(zones, *zone.Name)
+		}
+
+		if output.NextToken == nil {
+			break
+		} else {
+			input.NextToken = output.NextToken
+		}
+	}
+
+	// AWS returns zone names with a trailing period, i.e. "myzone.com." instead of
+	// "myzone.com". We need to add the period if it's missing.
+	zoneName := associationInput.ZoneName
+	if !strings.HasSuffix(zoneName, ".") {
+		zoneName += "."
+	}
+	assert.Contains(t, zones, zoneName)
 }
 
 func findZoneE(ctx context.Context, client Route53Client, zoneName string) (*types.HostedZone, bool, error) {
