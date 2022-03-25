@@ -306,16 +306,20 @@ func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, inpu
 	for _, subnet := range input.Subnets {
 		subnetIDToInstanceCountMap[*subnet.SubnetId] = 0
 	}
+
 	for _, instance := range input.Instances {
 		if _, ok := subnetIDToInstanceCountMap[*instance.SubnetId]; !ok {
-			// Fail the test if we get a subnet from an instance that was not in the original list of subnets.
-			t.Fatalf("Subnet %s associated with instance %s is not in the input list of subnets.",
+			t.Logf("Subnet %s associated with instance %s is not in the input list of subnets.",
 				*instance.SubnetId, *instance.InstanceId)
+			subnetIDToInstanceCountMap[*instance.SubnetId] = 0
 		}
 		subnetIDToInstanceCountMap[*instance.SubnetId] += 1
 	}
 
-	maxInstancesPerSubnet := int(math.Ceil(float64(len(input.Instances)) / float64(len(input.Subnets))))
+	numSubnets := len(subnetIDToInstanceCountMap)
+	assert.Greater(t, numSubnets, 0, "The provided subnet and EC2 instance list do not contain any subnets.")
+	maxInstancesPerSubnet := int(math.Ceil(float64(len(input.Instances)) / float64(numSubnets)))
+
 	for subnetID, instanceCount := range subnetIDToInstanceCountMap {
 		assert.LessOrEqual(t, instanceCount, maxInstancesPerSubnet, "Subnet %s is overloaded with %d EC2 instances.", subnetID, instanceCount)
 	}

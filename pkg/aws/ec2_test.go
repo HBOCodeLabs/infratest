@@ -757,6 +757,31 @@ func TestAssertEC2InstancesSubnetBalanced_SingleEC2Instance(t *testing.T) {
 	assert.False(t, fakeTest.Failed())
 }
 
+func TestAssertEC2InstancesSubnetBalanced_EmptySubnetList(t *testing.T) {
+	subnetID1 := "s123456"
+	subnetID2 := "s7891011"
+	instanceID1 := "a123456"
+	instanceID2 := "a123456"
+	instances := []types.Instance{
+		{
+			InstanceId: &instanceID1,
+			SubnetId:   &subnetID1,
+		},
+		{
+			InstanceId: &instanceID2,
+			SubnetId:   &subnetID2,
+		},
+	}
+	input := AssertEC2InstancesSubnetBalancedInput{
+		Instances: instances,
+	}
+	fakeTest := &testing.T{}
+	ctx := context.Background()
+
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
+	assert.False(t, fakeTest.Failed())
+}
+
 func TestCreateFiltersFromMap(t *testing.T) {
 	filterKey := "key"
 	filterKey2 := "otherkey"
