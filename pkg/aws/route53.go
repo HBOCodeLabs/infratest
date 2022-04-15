@@ -106,10 +106,9 @@ func AssertRoute53ZoneIsAssociatedWithVPC(t *testing.T, ctx context.Context, cli
 			zones = append(zones, *zone.Name)
 		}
 
-		if output.NextToken == nil {
+		input.NextToken = output.NextToken
+		if input.NextToken == nil {
 			break
-		} else {
-			input.NextToken = output.NextToken
 		}
 	}
 

@@ -622,16 +622,9 @@ func TestGetEC2InstancesByTag(t *testing.T) {
 func TestAssertEC2InstancesSubnetBalanced_Balanced(t *testing.T) {
 	subnetID1 := "s123456"
 	subnetID2 := "s7891011"
-	subnets := []types.Subnet{
-		{
-			SubnetId: &subnetID1,
-		},
-		{
-			SubnetId: &subnetID2,
-		},
-	}
 	instanceID1 := "a123456"
 	instanceID2 := "b123456"
+
 	instances := []types.Instance{
 		{
 			InstanceId: &instanceID1,
@@ -642,28 +635,16 @@ func TestAssertEC2InstancesSubnetBalanced_Balanced(t *testing.T) {
 			SubnetId:   &subnetID2,
 		},
 	}
-	input := AssertEC2InstancesSubnetBalancedInput{
-		Instances: instances,
-		Subnets:   subnets,
-	}
 	fakeTest := &testing.T{}
 	ctx := context.Background()
 
-	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, instances)
 	assert.False(t, fakeTest.Failed())
 }
 
 func TestAssertEC2InstancesSubnetBalanced_Unbalanced(t *testing.T) {
 	subnetID1 := "s123456"
 	subnetID2 := "s7891011"
-	subnets := []types.Subnet{
-		{
-			SubnetId: &subnetID1,
-		},
-		{
-			SubnetId: &subnetID2,
-		},
-	}
 	instanceID1 := "a123456"
 	instanceID2 := "b123456"
 	instanceID3 := "c123456"
@@ -686,20 +667,15 @@ func TestAssertEC2InstancesSubnetBalanced_Unbalanced(t *testing.T) {
 			SubnetId:   &subnetID2,
 		},
 	}
-	input := AssertEC2InstancesSubnetBalancedInput{
-		Instances: instances,
-		Subnets:   subnets,
-	}
 	fakeTest := &testing.T{}
 	ctx := context.Background()
 
-	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, instances)
 	assert.True(t, fakeTest.Failed())
 }
 
 func TestAssertEC2InstancesSubnetBalanced_SingleSubnet(t *testing.T) {
 	subnetID1 := "s123456"
-	subnets := []types.Subnet{{SubnetId: &subnetID1}}
 	instanceID1 := "a123456"
 	instanceID2 := "b123456"
 	instanceID3 := "c123456"
@@ -717,28 +693,15 @@ func TestAssertEC2InstancesSubnetBalanced_SingleSubnet(t *testing.T) {
 			SubnetId:   &subnetID1,
 		},
 	}
-	input := AssertEC2InstancesSubnetBalancedInput{
-		Instances: instances,
-		Subnets:   subnets,
-	}
 	fakeTest := &testing.T{}
 	ctx := context.Background()
 
-	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, instances)
 	assert.False(t, fakeTest.Failed())
 }
 
 func TestAssertEC2InstancesSubnetBalanced_SingleEC2Instance(t *testing.T) {
 	subnetID1 := "s123456"
-	subnetID2 := "s7891011"
-	subnets := []types.Subnet{
-		{
-			SubnetId: &subnetID1,
-		},
-		{
-			SubnetId: &subnetID2,
-		},
-	}
 	instanceID1 := "a123456"
 	instances := []types.Instance{
 		{
@@ -746,40 +709,25 @@ func TestAssertEC2InstancesSubnetBalanced_SingleEC2Instance(t *testing.T) {
 			SubnetId:   &subnetID1,
 		},
 	}
-	input := AssertEC2InstancesSubnetBalancedInput{
-		Instances: instances,
-		Subnets:   subnets,
-	}
 	fakeTest := &testing.T{}
 	ctx := context.Background()
 
-	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, instances)
 	assert.False(t, fakeTest.Failed())
 }
 
-func TestAssertEC2InstancesSubnetBalanced_EmptySubnetList(t *testing.T) {
-	subnetID1 := "s123456"
-	subnetID2 := "s7891011"
+func TestAssertEC2InstancesSubnetBalanced_NoSubnets(t *testing.T) {
 	instanceID1 := "a123456"
-	instanceID2 := "a123456"
 	instances := []types.Instance{
 		{
 			InstanceId: &instanceID1,
-			SubnetId:   &subnetID1,
 		},
-		{
-			InstanceId: &instanceID2,
-			SubnetId:   &subnetID2,
-		},
-	}
-	input := AssertEC2InstancesSubnetBalancedInput{
-		Instances: instances,
 	}
 	fakeTest := &testing.T{}
 	ctx := context.Background()
 
-	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, input)
-	assert.False(t, fakeTest.Failed())
+	AssertEC2InstancesBalancedInSubnets(fakeTest, ctx, instances)
+	assert.True(t, fakeTest.Failed())
 }
 
 func TestCreateFiltersFromMap(t *testing.T) {

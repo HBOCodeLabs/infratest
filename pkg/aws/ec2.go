@@ -290,35 +290,23 @@ func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[strin
 	return
 }
 
-type AssertEC2InstancesSubnetBalancedInput struct {
-	// A list of instances
-	Instances []types.Instance
-
-	// A list of subnets
-	Subnets []types.Subnet
-}
-
 // AssertEC2InstancesBalancedInSubnets asserts that EC2 instances in a list are spread evenly throughout
-// a list of subnets. Given a list of unique subnets and EC2 instances belonging to those subnets, no subnet should
-// have more than ceil(# instances / # subnets).
-func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
+// their attached subnets. Given a list of unique EC2 instances, no subnet should have more than ceil(# instances / # subnets).
+func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, instances []types.Instance) {
 	subnetIDToInstanceCountMap := make(map[string]int)
-	for _, subnet := range input.Subnets {
-		subnetIDToInstanceCountMap[*subnet.SubnetId] = 0
-	}
 
-	for _, instance := range input.Instances {
-		if _, ok := subnetIDToInstanceCountMap[*instance.SubnetId]; !ok {
-			t.Logf("Subnet %s associated with instance %s is not in the input list of subnets.",
-				*instance.SubnetId, *instance.InstanceId)
-			subnetIDToInstanceCountMap[*instance.SubnetId] = 0
+	for _, instance := range instances {
+		if instance.SubnetId != nil {
+			if _, ok := subnetIDToInstanceCountMap[*instance.SubnetId]; !ok {
+				subnetIDToInstanceCountMap[*instance.SubnetId] = 0
+			}
+			subnetIDToInstanceCountMap[*instance.SubnetId] += 1
 		}
-		subnetIDToInstanceCountMap[*instance.SubnetId] += 1
 	}
 
 	numSubnets := len(subnetIDToInstanceCountMap)
-	assert.Greater(t, numSubnets, 0, "The provided subnet and EC2 instance list do not contain any subnets.")
-	maxInstancesPerSubnet := int(math.Ceil(float64(len(input.Instances)) / float64(numSubnets)))
+	assert.Greater(t, numSubnets, 0, "The provided EC2 instance list does not contain any subnets.")
+	maxInstancesPerSubnet := int(math.Ceil(float64(len(instances)) / float64(numSubnets)))
 
 	for subnetID, instanceCount := range subnetIDToInstanceCountMap {
 		assert.LessOrEqual(t, instanceCount, maxInstancesPerSubnet, "Subnet %s is overloaded with %d EC2 instances.", subnetID, instanceCount)
