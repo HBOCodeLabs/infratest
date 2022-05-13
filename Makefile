@@ -6,6 +6,7 @@ export SHELL:=/bin/bash
 export SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
 
 export K8S_VERSION:=1.21.1
+export VAULT_VERSION:=1.10.3
 
 .ONESHELL:
 
@@ -41,3 +42,8 @@ mock: tools
 k8s-integration-test:
 	echo K8S_VERSION: $(K8S_VERSION)
 	go test -v -timeout 10m -count 1 ./integration/k8s_test.go
+
+.PHONY: vault-integration-test
+vault-integration-test:
+	echo VAULT_VERSION: $(VAULT_VERSION)
+	go test -v -timeout 10m -count 1 ./integration/vault_test.go

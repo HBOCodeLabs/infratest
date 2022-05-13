@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.
   the CHANGELOG file with the version input at run time (the workflow is manually invoked whenever
   we want to generate a release).
 
+### Added
+* A new method, `vault.AssertSecretExits`, for asserting that secrets exist in Hashicorp
+  [Vault](https://vaultproject.io).
 
 ## [v0.9.0] - 2022-05-20
 
