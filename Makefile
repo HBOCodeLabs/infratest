@@ -33,6 +33,7 @@ mock: tools
 	mockgen -source pkg/aws/eks.go -destination mock/eks.go -package mock
 	mockgen -source pkg/k8s/jobs.go -destination mock/k8s_jobs.go -package mock
 	mockgen -source pkg/k8s/util.go -destination mock/k8s_util.go -package mock
+	go generate ./...
 
 .PHONY: mock
 
