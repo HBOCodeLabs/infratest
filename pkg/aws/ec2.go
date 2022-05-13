@@ -5,6 +5,7 @@ package aws
 import (
 	"context"
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -289,25 +290,26 @@ func getEC2InstancesByTagE(ctx context.Context, client EC2Client, tags map[strin
 	return
 }
 
-type AssertEC2InstancesSubnetBalancedInput struct {
-	// A list of instances
-	Instances []types.Instance
+// AssertEC2InstancesBalancedInSubnets asserts that EC2 instances in a list are spread evenly throughout
+// their attached subnets. Given a list of unique EC2 instances, no subnet should have more than ceil(# instances / # subnets).
+func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, instances []types.Instance) {
+	subnetIDToInstanceCountMap := make(map[string]int)
 
-	// A list of subnets
-	Subnets []types.Subnet
-}
+	for _, instance := range instances {
+		if instance.SubnetId != nil {
+			if _, ok := subnetIDToInstanceCountMap[*instance.SubnetId]; !ok {
+				subnetIDToInstanceCountMap[*instance.SubnetId] = 0
+			}
+			subnetIDToInstanceCountMap[*instance.SubnetId] += 1
+		}
+	}
 
-// AssertEC2InstancesBalancedInSubnets asserts that EC2 instances in a list are spread evenly throughout a list of subnets,
-// such that instance number 'x' in the list should be placed in the subnet with an index of 'x modulus the length of the
-// subnet list'.
-func AssertEC2InstancesBalancedInSubnets(t *testing.T, ctx context.Context, input AssertEC2InstancesSubnetBalancedInput) {
-	subnetListLength := len(input.Subnets)
-	assert.Greater(t, subnetListLength, 0, "The provided subnet list does not contain any elements.")
-	assert.Greater(t, len(input.Instances), 0, "The provided instance list does not contain any elements.")
-	for instanceIndex, instance := range input.Instances {
-		acutalSubnetID := instance.SubnetId
-		expectedSubnetID := input.Subnets[instanceIndex%subnetListLength].SubnetId
-		assert.Equal(t, expectedSubnetID, acutalSubnetID, "Instance with ID '%s' is not in expected subnet.")
+	numSubnets := len(subnetIDToInstanceCountMap)
+	assert.Greater(t, numSubnets, 0, "The provided EC2 instance list does not contain any subnets.")
+	maxInstancesPerSubnet := int(math.Ceil(float64(len(instances)) / float64(numSubnets)))
+
+	for subnetID, instanceCount := range subnetIDToInstanceCountMap {
+		assert.LessOrEqual(t, instanceCount, maxInstancesPerSubnet, "Subnet %s is overloaded with %d EC2 instances.", subnetID, instanceCount)
 	}
 }
 
