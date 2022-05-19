@@ -17,12 +17,19 @@ type Route53ClientMock struct {
 	listHostedZonesOutput *route53.ListHostedZonesOutput
 	listHostedZonesErr    error
 
+	listHostedZonesByVPCOutput *route53.ListHostedZonesByVPCOutput
+	listHostedZonesByVPCErr    error
+
 	listResourceRecordSetsOutput *route53.ListResourceRecordSetsOutput
 	listResourceRecordSetsErr    error
 }
 
 func (c Route53ClientMock) ListHostedZonesByName(ctx context.Context, input *route53.ListHostedZonesByNameInput) (*route53.ListHostedZonesOutput, error) {
 	return c.listHostedZonesOutput, c.listHostedZonesErr
+}
+
+func (c Route53ClientMock) ListHostedZonesByVPC(ctx context.Context, input *route53.ListHostedZonesByVPCInput) (*route53.ListHostedZonesByVPCOutput, error) {
+	return c.listHostedZonesByVPCOutput, c.listHostedZonesByVPCErr
 }
 
 func (c Route53ClientMock) ListResourceRecordSets(ctx context.Context, input *route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error) {
@@ -243,4 +250,58 @@ func TestAssertRoute53RecordExistsInHostedZone_ListHostedZonesByNameInput_Error(
 	})
 
 	assert.True(t, fakeTest.Failed(), "expected AssertRecordExistsInZone to fail")
+}
+
+func TestAssertRoute53IsAssociatedWithVPC_Error(t *testing.T) {
+	fakeTest := &testing.T{}
+	vpcID, vpcRegion, zoneName := "vpc-fake", types.VPCRegionUsEast1, "foo.com."
+	client := Route53ClientMock{
+		listHostedZonesByVPCOutput: &route53.ListHostedZonesByVPCOutput{NextToken: nil},
+		listHostedZonesByVPCErr:    errors.New("some error"),
+	}
+
+	AssertRoute53ZoneIsAssociatedWithVPC(fakeTest, context.Background(), client, AssertRoute53ZoneIsAssociatedWithVPCInput{
+		VPCID:     vpcID,
+		VPCRegion: vpcRegion,
+		ZoneName:  zoneName,
+	})
+	assert.True(t, fakeTest.Failed(), "expected AssertRoute53ZoneIsAssociatedWithVPC to fail")
+}
+
+func TestAssertRoute53IsAssociatedWithVPC_Found(t *testing.T) {
+	fakeTest := &testing.T{}
+	vpcID, vpcRegion, zoneName := "vpc-fake", types.VPCRegionUsEast1, "foo.com."
+	client := Route53ClientMock{
+		listHostedZonesByVPCOutput: &route53.ListHostedZonesByVPCOutput{
+			HostedZoneSummaries: []types.HostedZoneSummary{{Name: &zoneName}},
+			NextToken:           nil,
+		},
+		listHostedZonesByVPCErr: nil,
+	}
+
+	AssertRoute53ZoneIsAssociatedWithVPC(fakeTest, context.Background(), client, AssertRoute53ZoneIsAssociatedWithVPCInput{
+		VPCID:     vpcID,
+		VPCRegion: vpcRegion,
+		ZoneName:  zoneName,
+	})
+	assert.False(t, fakeTest.Failed(), "expected AssertRoute53ZoneIsAssociatedWithVPC to pass")
+}
+
+func TestAssertRoute53IsAssociatedWithVPC_NotFound(t *testing.T) {
+	fakeTest := &testing.T{}
+	vpcID, vpcRegion, zoneName := "vpc-fake", types.VPCRegionUsEast1, "foo.com."
+	client := Route53ClientMock{
+		listHostedZonesByVPCOutput: &route53.ListHostedZonesByVPCOutput{
+			HostedZoneSummaries: []types.HostedZoneSummary{},
+			NextToken:           nil,
+		},
+		listHostedZonesByVPCErr: nil,
+	}
+
+	AssertRoute53ZoneIsAssociatedWithVPC(fakeTest, context.Background(), client, AssertRoute53ZoneIsAssociatedWithVPCInput{
+		VPCID:     vpcID,
+		VPCRegion: vpcRegion,
+		ZoneName:  zoneName,
+	})
+	assert.True(t, fakeTest.Failed(), "expected AssertRoute53ZoneIsAssociatedWithVPC to fail")
 }
