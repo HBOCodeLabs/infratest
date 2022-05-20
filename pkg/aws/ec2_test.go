@@ -1092,3 +1092,36 @@ func TestAssertEC2VolumeType_MatchWithIOPSMultipleDevices(t *testing.T) {
 	// Assert
 	assert.False(t, fakeTest.Failed())
 }
+
+func TestAssertEC2VolumeTagValue_Match(t *testing.T) {
+	// Setup
+	volumeId := "v123dfasd92"
+	tagName := "MyTag"
+	tagValue := "TagValue"
+	encrypted := true
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				Tags: []types.Tag{
+					Key:   &tagName,
+					Value: &tagValue,
+				},
+			},
+		},
+	}
+	assertEC2VolumeTagValueInput := AssertEC2VolumeTagValueInput{
+		TagName:  tagName,
+		Value:    tagValue,
+		VolumeId: volumeId,
+	}
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	ctx := context.Background()
+	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeVolumes(ctx, expectedInput).Times(1).Return(volumeOutput, nil)
+
+	//Test
+	AssertEC2VolumeTagValue(fakeTest, ctx, clientMock, assertEC2VolumeTagValueInput)
+	assert.False(t, fakeTest.Failed(), "AssertEC2VolumeTagValue failed the test when tag value matched.")
+}

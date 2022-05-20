@@ -75,6 +75,16 @@ type AssertEC2TagValueInput struct {
 	InstanceID string
 }
 
+// AssertEC2VolumeTagValueInput is used as an input to the AssertEC2VolumeTagValue method.
+type AssertEC2VolumeTagValueInput struct {
+	// The name of the tag to assert exists.
+	TagName string
+	// The value of the tag to assert.
+	Value string
+	// The Volume ID that the method will assert has a tag with the specified tag name and the specified value.
+	VolumeId string
+}
+
 // AssertEC2VolumeEncryptedE asserts that a volume attached to an EC2 instance is encrypted and (optionally) done so using a specified KMS Key.
 // This function is deprecated in favor of the AssertEC2VolumeEncrypted method.
 func AssertEC2VolumeEncryptedE(ctx context.Context, client EC2Client, input AssertEC2VolumeEncryptedInput) (assertion bool, err error) {
@@ -229,6 +239,18 @@ func AssertEC2TagValue(t *testing.T, ctx context.Context, client EC2Client, inpu
 		}
 	}
 	assert.True(t, hasMatch, "Tag with key '%s' does not exist.", input.TagName)
+}
+
+// AssertEC2VolumeTagValue asserts that an EBS Volumes has a tag with the given value.
+func AssertEC2VolumeTagValue(t *testing.T, ctx context.Context, client EC2Client, input AssertEC2VolumeTagValueInput) {
+	volume, _ := getEC2VolumeByVolumeIDE(ctx, client, input.VolumeId)
+	for _, tag := range volume.Tags {
+		tagKey := *tag.Key
+		tagValue := *tag.Value
+		if tagKey == input.TagName {
+			assert.Equal(t, input.Value, tagValue, "Tag with key '%s' does not match expected value.", tagKey)
+		}
+	}
 }
 
 func getEC2InstanceByInstanceIDE(ctx context.Context, client EC2Client, InstanceID string) (types.Instance, error) {
