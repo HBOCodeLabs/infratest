@@ -1,0 +1,24 @@
+run:
+  concurrency: 8
+  timeout: 5m
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gocritic
+    - gosimple
+    - govet
+    - ineffassign
+    - paralleltest
+    - revive
+    - staticcheck
+    - structcheck
+    - unused
+    - varcheck
+severity:
+  default-severity: info
+  rules:
+    - linters:
+        - deadcode
+      severity: info

@@ -10,6 +10,14 @@ export VAULT_VERSION:=1.10.3
 
 .ONESHELL:
 
+lint: tools
+	golangci-lint run --new-from-rev=main
+.PHONY: lint
+
+lint-full:
+	golangci-lint run
+.PHONY: lint
+
 vet:
 	go vet $(SOURCE)
 .PHONY: vet

@@ -13,6 +13,8 @@ jobs:
           go-version: 1.17
       - name: Check out source code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: dangoslen/changelog-enforcer@v3
       - uses: actions/cache@v2
         with:
@@ -22,6 +24,14 @@ jobs:
             ${{ runner.os }}-go-
       - name: Run tests
         run: make
+      - name: Run Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.46.2
+          skip-pkg-cache: true
+          only-new-issues: true
+          github-token: ${{ github.token }}
+
   k8s_integration_test:
     name: Run k8s integration tests
     runs-on: ubuntu-20.04
