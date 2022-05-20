@@ -1104,11 +1104,16 @@ func TestAssertEC2VolumeTagValue_Match(t *testing.T) {
 			{
 				Encrypted: &encrypted,
 				Tags: []types.Tag{
-					Key:   &tagName,
-					Value: &tagValue,
+					{
+						Key:   &tagName,
+						Value: &tagValue,
+					},
 				},
 			},
 		},
+	}
+	expectedInput := &ec2.DescribeVolumesInput{
+		VolumeIds: []string{volumeId},
 	}
 	assertEC2VolumeTagValueInput := AssertEC2VolumeTagValueInput{
 		TagName:  tagName,
@@ -1124,4 +1129,43 @@ func TestAssertEC2VolumeTagValue_Match(t *testing.T) {
 	//Test
 	AssertEC2VolumeTagValue(fakeTest, ctx, clientMock, assertEC2VolumeTagValueInput)
 	assert.False(t, fakeTest.Failed(), "AssertEC2VolumeTagValue failed the test when tag value matched.")
+}
+
+func TestAssertEC2VolumeTagValue_NoMatch(t *testing.T) {
+	// Setup
+	volumeId := "v123dfasd92"
+	tagName := "MyTag"
+	tagValue := "TagValue"
+	wrongTagValue := "blah"
+	encrypted := true
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				Tags: []types.Tag{
+					{
+						Key:   &tagName,
+						Value: &wrongTagValue,
+					},
+				},
+			},
+		},
+	}
+	expectedInput := &ec2.DescribeVolumesInput{
+		VolumeIds: []string{volumeId},
+	}
+	assertEC2VolumeTagValueInput := AssertEC2VolumeTagValueInput{
+		TagName:  tagName,
+		Value:    tagValue,
+		VolumeId: volumeId,
+	}
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	ctx := context.Background()
+	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeVolumes(ctx, expectedInput).Times(1).Return(volumeOutput, nil)
+
+	//Test
+	AssertEC2VolumeTagValue(fakeTest, ctx, clientMock, assertEC2VolumeTagValueInput)
+	assert.True(t, fakeTest.Failed(), "AssertEC2VolumeTagValue did not fail the test when tag value matched.")
 }
