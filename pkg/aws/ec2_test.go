@@ -1118,7 +1118,7 @@ func TestAssertEC2VolumeTagValue_Match(t *testing.T) {
 	assertEC2VolumeTagValueInput := AssertEC2VolumeTagValueInput{
 		TagName:  tagName,
 		Value:    tagValue,
-		VolumeId: volumeId,
+		VolumeID: volumeId,
 	}
 	ctrl := gomock.NewController(t)
 	clientMock := mock.NewMockEC2Client(ctrl)
@@ -1157,7 +1157,7 @@ func TestAssertEC2VolumeTagValue_NoMatch(t *testing.T) {
 	assertEC2VolumeTagValueInput := AssertEC2VolumeTagValueInput{
 		TagName:  tagName,
 		Value:    tagValue,
-		VolumeId: volumeId,
+		VolumeID: volumeId,
 	}
 	ctrl := gomock.NewController(t)
 	clientMock := mock.NewMockEC2Client(ctrl)
@@ -1167,5 +1167,44 @@ func TestAssertEC2VolumeTagValue_NoMatch(t *testing.T) {
 
 	//Test
 	AssertEC2VolumeTagValue(fakeTest, ctx, clientMock, assertEC2VolumeTagValueInput)
-	assert.True(t, fakeTest.Failed(), "AssertEC2VolumeTagValue did not fail the test when tag value matched.")
+	assert.True(t, fakeTest.Failed(), "AssertEC2VolumeTagValue did not fail the test when tag value did not match.")
+}
+
+func TestAssertEC2VolumeTagValue_NoTag(t *testing.T) {
+	// Setup
+	volumeId := "v123dfasd92"
+	tagName := "MyTag"
+	noTagKey := "noname"
+	tagValue := "TagValue"
+	encrypted := true
+	volumeOutput := &ec2.DescribeVolumesOutput{
+		Volumes: []types.Volume{
+			{
+				Encrypted: &encrypted,
+				Tags: []types.Tag{
+					{
+						Key:   &noTagKey,
+						Value: &tagValue,
+					},
+				},
+			},
+		},
+	}
+	expectedInput := &ec2.DescribeVolumesInput{
+		VolumeIds: []string{volumeId},
+	}
+	assertEC2VolumeTagValueInput := AssertEC2VolumeTagValueInput{
+		TagName:  tagName,
+		Value:    tagValue,
+		VolumeID: volumeId,
+	}
+	ctrl := gomock.NewController(t)
+	clientMock := mock.NewMockEC2Client(ctrl)
+	ctx := context.Background()
+	fakeTest := &testing.T{}
+	clientMock.EXPECT().DescribeVolumes(ctx, expectedInput).Times(1).Return(volumeOutput, nil)
+
+	//Test
+	AssertEC2VolumeTagValue(fakeTest, ctx, clientMock, assertEC2VolumeTagValueInput)
+	assert.True(t, fakeTest.Failed(), "AssertEC2VolumeTagValue did not fail the test when tag is not found.")
 }
