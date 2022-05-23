@@ -23,15 +23,3 @@ jobs:
           fetch-depth: 0
       - name: Run tests
         run: make
-      - name: Generate semantic version
-        id: generate-version
-        uses: paulhatch/semantic-version@v4.0.2
-        with:
-          tag_prefix: "v"
-          format: "${major}.${minor}.${patch}"
-      - name: Generate release
-        uses: Roang-zero1/github-create-release-action@master
-        with:
-          created_tag: "${{ steps.generate-version.outputs.version_tag }}"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

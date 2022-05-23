@@ -6,8 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.
 
 ## Unreleased
 
-### Added
-* A CHANGELOG file has been added, and the CI process now ensures it has been updated on pull requests.
+### Maintenance
+* A CHANGELOG file has been added, and the CI process now ensures it has been updated on pull
+  requests.
+* The workflow that runs on commits to the `main` branch has been updated to not generate releases
+  any more. Instead, a newly created `Release` workflow will be used, which automatically updates
+  the CHANGELOG file with the version input at run time (the workflow is manually invoked whenever
+  we want to generate a release).
 
 
 ## [v0.9.0] - 2022-05-20
