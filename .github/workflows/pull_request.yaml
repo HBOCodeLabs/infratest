@@ -13,6 +13,13 @@ jobs:
           go-version: 1.17
       - name: Check out source code
         uses: actions/checkout@v2
+      - uses: dangoslen/changelog-enforcer@v3
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Run tests
         run: make
   k8s_integration_test:
