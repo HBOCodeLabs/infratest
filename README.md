@@ -73,14 +73,12 @@ have the letter `E` as the last character of its name.
 
 ### Function signatures
 
-- Public functions must have `t *testing.T` as the first input parameter.
-- Any function which interacts with outside resources must have a context object
-  `ctx *context.Context` as an input, which should be directly after the test
-  object for public functions.
+- Functions must have a context object `ctx *context.Context` as the first input.
+- Public `Assert` functions must have `t *testing.T` as the second input parameter.
 - Any function which requires a third-party client, such as an AWS SDK client or
-  database client, must accept this client object directly after the context
-  object (which would be required since this by definition interacts with
-  outside resources). This client object must be an interface type as discussed
+  database client, must either accept this client object directly after the test
+  object, or allow setting this via a functional option (in which case the method must ensure that a
+  client has been set). This client object must be an interface type as discussed
   in the section on [the use of interfaces over direct
   clients](#use-of-interaces-rather-than-direct-types).
 
@@ -104,6 +102,14 @@ type directly. (An example of this would be the AWS SDK.)
 We do this so that we can easily unit test our methods without relying on provisioning 
 external resources.
 
+### Use of functional options rather than struct / explicit arguments
+
+Methods should use [functional
+options](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis) for passing of
+inputs other than a context, test, or possibly client objects, rather than using either explicit
+arguments or structs. This is to make preservation of method signatures easier over time, as well as
+making behavior more explicit.
+
 ### Tests
 
 All methods, especially ones that are public-facing, must have associated unit
@@ -112,6 +118,9 @@ absolutely required; by using interfaces as described in the [previous
 section](#use-of-interaces-rather-than-direct-types) this should be simple to
 accomplish.
 
+Where code interacts with outside APIs that are themselves versioned, and where multiple versions
+are supported, integration tests against known supported versions of the vendor APIs are recommended, but not 
+strictly required. Examples would include things like Hashicorp Vault and Kuberentes.
 
 ### Contributing
 
