@@ -21,17 +21,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Run tests
         run: make
-      - name: Generate semantic version
-        id: generate-version
-        uses: paulhatch/semantic-version@v4.0.2
-        with:
-          tag_prefix: "v"
-          format: "${major}.${minor}.${patch}"
-      - name: Generate release
-        uses: Roang-zero1/github-create-release-action@master
-        with:
-          created_tag: "${{ steps.generate-version.outputs.version_tag }}"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

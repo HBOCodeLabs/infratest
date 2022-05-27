@@ -1,0 +1,42 @@
+name: Generate release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The semantic version to assign to the release.
+        required: true
+      draft-release:
+        description: If set to 'true', will generate a draft release. Defaults to 'false'.
+        required: false
+        type: boolean
+        default: false
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.17
+      - name: Check out source code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Update CHANGELOG
+        uses: stefanzweifel/changelog-updater-action@v1
+        with:
+          latest-version: ${{ github.event.inputs.version }}
+      - name: Commit CHANGELOG file
+        shell: bash
+        run: git commit -m"Updated release ${{ github.event.inputs.version }} CHANGELOG" CHANGELOG.md && git push origin main
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.event.inputs.version }}
+          tag_name: ${{ github.event.inputs.version }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          draft: ${{ github.event.inputs.draft_release }}
+

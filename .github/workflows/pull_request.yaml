@@ -13,8 +13,25 @@ jobs:
           go-version: 1.17
       - name: Check out source code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: dangoslen/changelog-enforcer@v3
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Run tests
         run: make
+      - name: Run Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.46.2
+          skip-pkg-cache: true
+          only-new-issues: true
+          github-token: ${{ github.token }}
+
   k8s_integration_test:
     name: Run k8s integration tests
     runs-on: ubuntu-20.04
@@ -23,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         k8s_version:
-          - 1.22.4          
+          - 1.22.4
           - 1.21.2
           - 1.20.7
           - 1.19.11
@@ -36,3 +53,24 @@ jobs:
         uses: actions/checkout@v2
       - name: Run k8s integration tests
         run: make k8s-integration-test K8S_VERSION=${{ matrix.k8s_version }}
+  vault_integration_test:
+    name: Run Vault integration tests
+    runs-on: ubuntu-20.04
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        vault_version:
+          - 1.10.3
+          - 1.9.6
+          - 1.8.11
+          - 1.7.10
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.17
+      - name: Check out source code
+        uses: actions/checkout@v2
+      - name: Run Vault integration tests
+        run: make vault-integration-test VAULT_VERSION=${{ matrix.vault_version }}
