@@ -16,6 +16,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: dangoslen/changelog-enforcer@v3
+        with:
+          skipLabels: dependencies
       - uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
