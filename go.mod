@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.142.1
 	github.com/aws/aws-sdk-go-v2/service/eks v1.18.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.11.0
-	github.com/aws/aws-sdk-go-v2/service/route53 v1.12.0
+	github.com/aws/aws-sdk-go-v2/service/route53 v1.36.1
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.46.2
 	github.com/gruntwork-io/terratest v0.38.8
