@@ -4,7 +4,6 @@ run:
 linters:
   disable-all: true
   enable:
-    - deadcode
     - errcheck
     - gocritic
     - gosimple
@@ -13,12 +12,6 @@ linters:
     - paralleltest
     - revive
     - staticcheck
-    - structcheck
     - unused
-    - varcheck
 severity:
   default-severity: info
-  rules:
-    - linters:
-        - deadcode
-      severity: info

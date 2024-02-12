@@ -53,9 +53,10 @@ func stopVaultDocker(t *testing.T, name string) {
 	docker.Stop(t, containers, stopOpts)
 }
 
-//nolint:paralleltest
 // This is added because tests in this suite do not currently support parallel execution
 // due to the dependency on Docker containers. To be fixed in a future release!
+//
+//nolint:paralleltest
 func TestVault(t *testing.T) {
 	vaultVersion := os.Getenv("VAULT_VERSION")
 	uniqueID := random.UniqueId()
