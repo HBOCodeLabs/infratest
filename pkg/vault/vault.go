@@ -4,16 +4,17 @@
 /*
 Package vault provides methods for asserting that objects in Vault exist and match a given specification.
 
-Basics
+# Basics
 
 Methods in the vault package make use of the functional options pattern as a way to easily evolve interfaces
 without breaking backwards compatibility. Many methods require the use of the Vault LogicalClient struct,
 which is the object used to do most read / write / non-admin functions in the Go Vault client. For these,
 you can use the `WithLogicalClient` functional option.
 
-Examples
+# Examples
 
 Execute a method using a Vault client configured using standard Vault environment variables
+
 	import (
 		"os"
 		"testing"
@@ -132,9 +133,10 @@ AssertSecretExists asserts that a key/value secret exists at a given path and ha
 key present in the secret data. If the "WithValue" functional option is used, it wil also assert
 that the value of given secret key is the same as the passed in value.
 
-Examples
+# Examples
 
 Assert that a secret and key exists, using a passed in client, ignoring the value of the secret key.
+
 	expectedPath := "path"
 	expectedKey := "key"
 	AssertSecretExists(
@@ -144,7 +146,9 @@ Assert that a secret and key exists, using a passed in client, ignoring the valu
 		WithPath(expectedPath),
 		WithKey(expectedKey),
 	)
+
 Assert that a secret and key exists, using a passed in client, with a particular value.
+
 	expectedPath := "path"
 	expectedKey := "key"
 	expectedValue := "value"

@@ -54,7 +54,7 @@ func TestAssertJobSucceeds_Succeeds(t *testing.T) {
 		return returnJob, nil
 	})
 
-	AssertJobSucceeds(fakeTest, context.TODO(), jobClient, job)
+	AssertJobSucceeds(fakeTest, ctx, jobClient, job)
 
 	assert.False(t, fakeTest.Failed())
 }
@@ -101,7 +101,7 @@ func TestAssertJobSucceeds_Fails(t *testing.T) {
 		return returnJob, nil
 	})
 
-	AssertJobSucceeds(fakeTest, context.TODO(), jobClient, job)
+	AssertJobSucceeds(fakeTest, ctx, jobClient, job)
 
 	assert.True(t, fakeTest.Failed())
 }

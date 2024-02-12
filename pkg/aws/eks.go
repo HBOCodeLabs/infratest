@@ -27,8 +27,9 @@ type GetEKSClusterOutput struct {
 	CAData   []byte
 }
 
-/*	GetEKSClusterE returns some metadata about the specified EKS cluster, such as the endpoint and the CA certificate information.
-	It must be passed an AWS SDK v2 [EKS client object](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/eks#Client).
+/*
+GetEKSClusterE returns some metadata about the specified EKS cluster, such as the endpoint and the CA certificate information.
+It must be passed an AWS SDK v2 [EKS client object](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/eks#Client).
 */
 func GetEKSClusterE(ctx context.Context, client EKSClient, clusterName string, optFns ...GetEKSClusterEOptionsFunc) (output *GetEKSClusterOutput, err error) {
 	describeClusterInput := &eks.DescribeClusterInput{
