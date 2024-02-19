@@ -20,7 +20,7 @@ require (
 	golang.org/x/tools v0.17.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 	k8s.io/api v0.29.1
-	k8s.io/apimachinery v0.29.1
+	k8s.io/apimachinery v0.29.2
 	k8s.io/client-go v0.29.1
 	sigs.k8s.io/aws-iam-authenticator v0.6.17
 	sigs.k8s.io/kind v0.11.1
