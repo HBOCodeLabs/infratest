@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.26.0
 	github.com/aws/aws-sdk-go-v2/service/dax v1.17.6
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.146.0
-	github.com/aws/aws-sdk-go-v2/service/eks v1.37.1
+	github.com/aws/aws-sdk-go-v2/service/eks v1.41.2
 	github.com/aws/aws-sdk-go-v2/service/iam v1.31.3
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.37.1
 	github.com/golang/mock v1.6.0
