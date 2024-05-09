@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.37.1
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.56.0
-	github.com/gruntwork-io/terratest v0.46.11
+	github.com/gruntwork-io/terratest v0.46.14
 	github.com/hashicorp/vault/api v1.5.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/tools v0.17.0
