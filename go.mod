@@ -18,7 +18,7 @@ require (
 	github.com/golangci/golangci-lint v1.56.0
 	github.com/gruntwork-io/terratest v0.46.14
 	github.com/hashicorp/vault/api v1.5.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/tools v0.22.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 	k8s.io/api v0.30.3
@@ -235,7 +235,7 @@ require (
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
 	github.com/tdakkota/asciicheck v0.2.0 // indirect
